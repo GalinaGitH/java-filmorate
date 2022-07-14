@@ -18,8 +18,8 @@ import java.util.*;
 @NoArgsConstructor
 public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
-    @Autowired
-    UserService userService;
+
+    private UserService userService;
 
     @Autowired
     public UserController(UserService userService) {

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,10 +37,12 @@ public class InMemoryUserStorage implements UserStorage {
         users.remove(user.getId());
     }
 
+    @Override
     public Collection<User> findAllUsers() {
         return users.values();
     }
 
+    @Override
     public User get(long userId) {
         return users.get(userId);
     }

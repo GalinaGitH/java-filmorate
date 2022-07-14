@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -33,10 +34,12 @@ public class InMemoryFilmStorage implements FilmStorage {
         films.remove(film.getId());
     }
 
+    @Override
     public Collection<Film> findAll() {
         return films.values();
     }
 
+    @Override
     public Film get(long filmId) {
         return films.get(filmId);
     }

@@ -19,8 +19,8 @@ import java.util.*;
 @NoArgsConstructor
 public class FilmController {
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
-    @Autowired
-    FilmService filmService;
+
+    private FilmService filmService;
 
     @Autowired
     public FilmController(FilmService filmService) {
@@ -34,7 +34,7 @@ public class FilmController {
     }
 
     @GetMapping("/films/{filmId}")
-    public Film getUser(@PathVariable long filmId) {
+    public Film getFilm(@PathVariable long filmId) {
         log.debug("Get film by id={}", filmId);
         return filmService.get(filmId);
     }
@@ -55,7 +55,9 @@ public class FilmController {
 
     @PutMapping("/films/{filmId}/like/{userId}")
     public void addLikes(@PathVariable long filmId, @PathVariable long userId) {
-        log.debug("Добавлен еще один лайк");
+        log.debug("Добавлен еще один лайк фильму: {} от пользователя c id = {}",
+                filmService.get(filmId).getName(),
+                userId);
         filmService.addLikes(filmId, userId);
     }
 
