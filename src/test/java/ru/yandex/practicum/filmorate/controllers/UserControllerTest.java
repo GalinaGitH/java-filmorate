@@ -3,8 +3,12 @@ package ru.yandex.practicum.filmorate.controllers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import javax.validation.*;
 import java.time.LocalDate;
@@ -14,15 +18,32 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Validated
 class UserControllerTest {
+
+    UserService userService;
+    InMemoryUserStorage inMemoryUserStorage;
     UserController uController;
 
     @BeforeEach
     void init() {
-        uController = new UserController();
+        inMemoryUserStorage = new InMemoryUserStorage();
+        userService = new UserService(inMemoryUserStorage);
+        uController = new UserController(userService);
     }
 
     @Test
     public void createUserTest() {
+        User newUser = new User(0, "user@mail.ru", "testuser", "Mikl", LocalDate.of(1990, 8, 12));
+        uController.createUser(newUser);
+        uController.getUser(newUser.getId());
+        User newUser2 = new User(0, "user@mail.ru", "testuser", "Mikl", LocalDate.of(1990, 8, 12));
+        uController.createUser(newUser2);
+        uController.getUser(newUser2.getId());
+        assertEquals(newUser.getId(), 1);
+        assertEquals(newUser2.getId(), 2);
+    }
+
+    @Test
+    public void getUserTest() {
         User newUser = new User(0, "user@mail.ru", "testuser", "Mikl", LocalDate.of(1990, 8, 12));
         uController.createUser(newUser);
         assertEquals(newUser.getId(), 1);
@@ -96,5 +117,16 @@ class UserControllerTest {
         User nextUser = new User(0, "piterPen@mail.ru", "nextuser", "Piter", LocalDate.of(1987, 3, 12));
         uController.createUser(nextUser);
         assertEquals(2, uController.findAllUsers().size());
+    }
+@Test
+    public void addFriendTestAndGetListOfFriends() {
+    User newUser = new User(0, "alex@mail.ru", "newuser", "Alex", LocalDate.of(1985, 4, 19));
+    uController.createUser(newUser);
+    User nextUser = new User(0, "piterPen@mail.ru", "nextuser", "Piter", LocalDate.of(1987, 3, 12));
+    uController.createUser(nextUser);
+    long userId = newUser.getId();
+    long friendId = nextUser.getId();
+    uController.addFriend(userId, friendId);
+    assertEquals(1, uController.findAllFriends(userId).size());
     }
 }
