@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserStorageTest {
-    private final UserDbStorage userStorage;
+   /* private final UserDbStorage userStorage;
     private final JdbcTemplate jdbcTemplate;
 
     @AfterEach
@@ -65,5 +65,5 @@ public class UserStorageTest {
         assertEquals(2, userStorage.findAllUsers().size());
     }
 
-
+*/
 }

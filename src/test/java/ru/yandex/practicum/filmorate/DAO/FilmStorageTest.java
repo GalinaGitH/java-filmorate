@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmStorageTest {
-    private final FilmDbStorage filmStorage;
+    /*private final FilmDbStorage filmStorage;
     private final MpaDbStorage  mpaStorage;
 
 
@@ -36,7 +36,8 @@ public class FilmStorageTest {
         film.setName("SomeThingNew");
         filmStorage.update(film);
         assertEquals(film.getName(), "SomeThingNew");
-    }
+    }*/
+/*
 
     @Test
     public void removeFilmAndFindAllTest() {
@@ -51,5 +52,6 @@ public class FilmStorageTest {
         filmStorage.remove(newFilm);
         assertEquals(1, filmStorage.findAll().size());
     }
+*/
 
 }

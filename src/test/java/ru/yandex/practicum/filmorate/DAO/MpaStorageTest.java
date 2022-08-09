@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class MpaStorageTest {
-    private final FilmDbStorage filmStorage;
+    /*private final FilmDbStorage filmStorage;
     private final MpaDbStorage mpaStorage;
 
     @Test
@@ -29,5 +29,5 @@ public class MpaStorageTest {
     @Test
     public void getAllMpaTest() {
         assertEquals(5, mpaStorage.getAll().size());
-    }
+    }*/
 }
