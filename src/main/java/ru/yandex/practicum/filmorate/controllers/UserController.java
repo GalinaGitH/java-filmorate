@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FriendsService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -18,12 +19,13 @@ import java.util.*;
 @NoArgsConstructor
 public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
-
     private UserService userService;
+    private FriendsService friendsService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, FriendsService friendsService) {
         this.userService = userService;
+        this.friendsService = friendsService;
     }
 
     @GetMapping("/users")
@@ -54,26 +56,26 @@ public class UserController {
 
     @PutMapping("/users/{userId}/friends/{friendId}")
     public void addFriend(@PathVariable long userId, @PathVariable long friendId) {
-        userService.addFriend(userId, friendId);
+        friendsService.addFriend(userId, friendId);
         log.debug("Добавлен еще один друг");
     }
 
     @DeleteMapping("/users/{userId}/friends/{friendId}")
     public void deleteFriend(@PathVariable long userId, @PathVariable long friendId) {
-        userService.removeFriend(userId, friendId);
+        friendsService.removeFriend(userId, friendId);
         log.debug("Друг с id= {} удален из списка", friendId);
     }
 
     @GetMapping("/users/{userId}/friends/common/{otherId}")
     public Collection<User> findCommonFriends(@PathVariable long userId, @PathVariable long otherId) {
-        log.debug("Количество общих друзей: {}", userService.findAllCommonFriends(userId, otherId).size());
-        return userService.findAllCommonFriends(userId, otherId);
+        log.debug("Количество общих друзей: {}", friendsService.findAllCommonFriends(userId, otherId).size());
+        return friendsService.findAllCommonFriends(userId, otherId);
     }
 
     @GetMapping("/users/{userId}/friends")
     public Collection<User> findAllFriends(@PathVariable long userId) {
-        log.debug("Количество друзей: {}", userService.getListOfFriends(userId).size());
-        return userService.getListOfFriends(userId);
+        log.debug("Количество друзей: {}", friendsService.getListOfFriends(userId).size());
+        return friendsService.getListOfFriends(userId);
     }
 }
 
