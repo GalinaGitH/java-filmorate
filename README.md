@@ -1,32 +1,41 @@
 # java-filmorate
 Template repository for Filmorate project.
-https://miro.com/welcomeonboard/RDBQZDVPSXVmVFc2Y25lTkY3SXViUGxqa3FhQ3Z5WFRQZ0ZTOUw5UEx1Y0VTQTQ4dTNPVFBZYmxhZDlzdG5HYnwzNDU4NzY0NTI5OTE4MTAwNTE1?share_link_id=255020499630
+![](/Users/galinaromanova/Desktop/Filmorate database.png)
 
-примеры SQL запросов:
+примеры SQL запросов к БД:
 
-получение всех фильмов
-SELECT * FROM films
+получение всех фильмов:
+"select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION , MPA.MPA_ID, MPA.MPA_TYPE " +
+"from FILMS "+
+"Join MPA ON MPA.MPA_ID=FILMS.MPA_ID";
 
-получение всех пользователей
-SELECT * FROM users
+получение всех пользователей:
+"select USER_ID,USER_NAME,USER_EMAIL,USER_LOGIN,USER_BIRTHDAY " +
+"from USERS"
 
-топ N наиболее популярных фильмов
-SELECT film.name,
-COUNT (likes.user_id)
-FROM films
-LEFT JOIN likes ON films.film_id = likes.film_id
-ORDER BY COUNT (likes.user_id) DESC
-LIMIT N;
+топ N наиболее популярных фильмов:
+"SELECT FILMS.FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION , MPA.MPA_ID, MPA.MPA_TYPE " +
+"FROM FILMS "+
+"LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID "+
+"JOIN MPA ON MPA.MPA_ID=FILMS.MPA_ID "+
+"GROUP BY FILM_NAME "+
+"ORDER BY COUNT (L.USER_ID) DESC "+
+"LIMIT ?"
 
 список общих друзей с другим пользователем
-Пользователь 1 - user_id = '1'
-Пользователь 1 - user_id = '2'
+Пользователь 1 - user_id = 'U.USER_ID'
+Пользователь 2 - user_id = 'U2.USER_ID=F.FRIEND_ID'
 
-SELECT u.user_name
-FROM friends AS fr1
-LEFT JOIN friends AS fr2 ON fr1.friend_id=fr2.friend_id
-LEFT JOIN users AS u ON fr1.friend_id=u.user_id
-WHERE fr1.user_id = '1' AND fr.2user_id = '2';
+"select U2.USER_ID, U2.USER_NAME, U2.USER_EMAIL, U2.USER_LOGIN, U2.USER_BIRTHDAY " +
+"from USERS U " +
+"Join FRIENDS F ON U.USER_ID=F.USER_ID "+
+"Join USERS U2 ON U2.USER_ID= F.FRIEND_ID " +
+"where U.USER_ID = ?"
+
+Далее, сравниваем коллекции:
+Collection<User> friendsSet1 = getListOfFriends(userId);
+Collection<User> friendsSet2 = getListOfFriends(friendId);
+friendsSet1.retainAll(friendsSet2);
 
 
 
