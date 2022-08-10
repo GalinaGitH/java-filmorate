@@ -16,9 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FriendStorageTest {
-    /*private final UserDbStorage userStorage;
+    private final UserDbStorage userStorage;
     private final FriendDbStorage friendStorage;
-
 
     @Test
     public void addFriendTestAndGetListOfFriends() {
@@ -66,5 +65,4 @@ public class FriendStorageTest {
         friendStorage.addFriend(friendId, friendId2);
         assertEquals(1, friendStorage.findAllCommonFriends(userId, friendId).size());
     }
-*/
 }

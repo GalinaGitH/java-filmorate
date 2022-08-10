@@ -18,9 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class LikesStorageTest {
-    /*private final LikesDbStorage likesStorage;
+    private final LikesDbStorage likesStorage;
     private final UserDbStorage userStorage;
-
     private final FilmDbStorage filmStorage;
     private final MpaDbStorage mpaStorage;
 
@@ -34,6 +33,6 @@ public class LikesStorageTest {
         filmStorage.create(nextfilm);
         likesStorage.addLikes(nextfilm.getId(), newUser.getId());
         assertEquals(1, likesStorage.findPopularFilm(2).size());
-    }*/
+    }
 }
 

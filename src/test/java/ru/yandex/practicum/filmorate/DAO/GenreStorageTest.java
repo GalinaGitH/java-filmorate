@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class GenreStorageTest {
-    /*private final FilmDbStorage filmStorage;
     private final GenreDbStorage genreStorage;
 
     @Test
@@ -33,5 +32,4 @@ public class GenreStorageTest {
     public void getAllGenresTest() {
         assertEquals(6, genreStorage.getAll().size());
     }
-*/
 }

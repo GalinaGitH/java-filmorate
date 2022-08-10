@@ -1,12 +1,9 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.DAO.GenreStorage;
-import ru.yandex.practicum.filmorate.DAO.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.MpaStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -15,7 +12,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -32,6 +28,7 @@ public class FilmService {
         final Film filmFromStorage = filmStorage.get(film.getId());
         if (filmFromStorage == null) {
             filmStorage.create(film);
+            genreStorage.setFilmGenre(film);//записываем жанры фильму,заполняем таблицу FILM_GENRES
         } else throw new AlreadyExistException(String.format(
                 "Фильм с таким id %s уже зарегистрирован.", film.getId()));
         return film;
@@ -46,6 +43,7 @@ public class FilmService {
             throw new NotFoundException("Film with id=" + film.getId() + "not found");
         }
         filmStorage.update(film);
+        genreStorage.setFilmGenre(film);//записываем жанры фильму,заполняем таблицу FILM_GENRES
         return film;
     }
 
@@ -64,6 +62,7 @@ public class FilmService {
         if (film == null) {
             throw new NotFoundException("User with id=" + filmId + "not found");
         }
+        film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film))); //получаем жанры фильма и добавляем к обьекту
         return film;
     }
 
@@ -72,40 +71,6 @@ public class FilmService {
      */
     public Collection<Film> findAllFilms() {
         return filmStorage.findAll();
-    }
-
-    /**
-     * получение жанра по идентификатору
-     */
-    public Genre getGenreById(long id) {
-        if (id > 6 || id < 1) {
-            throw new NotFoundException("Genre with id=" + id + "not found");
-        }
-        return genreStorage.getById(id);
-    }
-
-    /**
-     * получение списка всех жанров
-     */
-    public List<Genre> getAllGenres() {
-        return genreStorage.getAll();
-    }
-
-    /**
-     * получение рейтинга(MPA) по идентификатору
-     */
-    public Mpa getMPAById(long id) {
-        if (id > 5 || id < 1) {
-            throw new NotFoundException("MPA with id=" + id + "not found");
-        }
-        return mpaStorage.getById(id);
-    }
-
-    /**
-     * получение списка всех рейтингов(MPA)
-     */
-    public List<Mpa> getAllMPA() {
-        return mpaStorage.getAll();
     }
 
 }

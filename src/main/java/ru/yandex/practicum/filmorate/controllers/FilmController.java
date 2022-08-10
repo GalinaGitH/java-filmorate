@@ -78,30 +78,6 @@ public class FilmController {
         return likesService.findPopularFilm(count);
     }
 
-    @GetMapping("/genres")
-    public List<Genre> getAllGenres() {
-        log.debug("Общее количество жанров в справочнике : {}", filmService.getAllGenres().size());
-        return filmService.getAllGenres();
-    }
-
-    @GetMapping("/genres/{genreId}")
-    public Genre getGenreById(@PathVariable long genreId) {
-        log.debug("Get genre by id={}", genreId);
-        return filmService.getGenreById(genreId);
-    }
-
-    @GetMapping("/mpa/{id}")
-    public Mpa getMPAById(@PathVariable long id) {
-        log.debug("Get MPA by id={}", id);
-        return filmService.getMPAById(id);
-    }
-
-    @GetMapping("/mpa")
-    public List<Mpa> getAllMPA() {
-        log.debug("Общее количество рейтингов MPA : {}", filmService.getAllMPA().size());
-        return filmService.getAllMPA();
-    }
-
 }
 
 

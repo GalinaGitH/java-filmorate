@@ -1,6 +1,6 @@
 # java-filmorate
 Template repository for Filmorate project.
-![img.png](img.png)
+![](/Users/galinaromanova/Desktop/Filmorate database.png)
 
 примеры SQL запросов к БД:
 

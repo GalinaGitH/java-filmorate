@@ -8,25 +8,22 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
-
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 @Repository
 @Primary
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final GenreDbStorage genreDbStorage;
+
 
     @Autowired
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, GenreDbStorage genreDbStorage) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.genreDbStorage = genreDbStorage;
     }
 
     @Override
@@ -44,7 +41,6 @@ public class FilmDbStorage implements FilmStorage {
             return stmt;
         }, keyHolder);
         film.setId(keyHolder.getKey().longValue());
-        genreDbStorage.setFilmGenre(film);//записываем жанры фильму,заполняем таблицу FILM_GENRES
         return film;
     }
 
@@ -60,7 +56,6 @@ public class FilmDbStorage implements FilmStorage {
                 , film.getDuration()
                 , film.getMpa().getId()
                 , film.getId());
-        genreDbStorage.setFilmGenre(film); // заново заполняем данные по жанрам для фильма
         return film;
     }
 
@@ -84,7 +79,7 @@ public class FilmDbStorage implements FilmStorage {
         return films.get(0);
     }
 
-    Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
+    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         Film film = Film.builder()
                 .id(resultSet.getLong("FILM_ID"))
                 .name(resultSet.getString("FILM_NAME"))
@@ -93,7 +88,6 @@ public class FilmDbStorage implements FilmStorage {
                 .duration(resultSet.getLong("FILM_DURATION"))
                 .mpa(new Mpa(resultSet.getInt("MPA.MPA_ID"), resultSet.getString("MPA.MPA_TYPE")))
                 .build();
-        film.setGenres(new HashSet<>(genreDbStorage.loadFilmGenre(film))); //получаем жанры фильма
         return film;
     }
     @Override
