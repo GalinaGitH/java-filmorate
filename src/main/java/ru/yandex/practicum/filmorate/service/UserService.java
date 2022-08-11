@@ -16,6 +16,7 @@ import java.util.*;
 public class UserService {
     private final UserStorage userStorage;
 
+
     /**
      * сохранение пользователя
      */
@@ -45,7 +46,7 @@ public class UserService {
     }
 
     /**
-     * удаление пользователя
+     * даление пользователя
      */
     public void delete(User user) {
         userStorage.remove(user);

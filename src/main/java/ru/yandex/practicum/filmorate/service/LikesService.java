@@ -32,7 +32,7 @@ public class LikesService {
     }
 
     /**
-     * удаление лайка
+     *  удаление лайка
      */
     public void removeLikes(long filmId, long userId) {
         final Film film = filmStorage.get(filmId);
@@ -44,7 +44,7 @@ public class LikesService {
     }
 
     /**
-     * вывод наиболее популярных фильмов по количеству лайков
+     *  вывод наиболее популярных фильмов по количеству лайков
      */
     public Collection<Film> findPopularFilm(Integer size) {
         return likesStorage.findPopularFilm(size);
