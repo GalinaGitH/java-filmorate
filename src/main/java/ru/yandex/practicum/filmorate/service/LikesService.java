@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 
 @Service
@@ -19,6 +21,7 @@ public class LikesService {
     private final LikesStorage likesStorage;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final GenreStorage genreStorage;
 
     /**
      * добавление лайка
@@ -47,7 +50,11 @@ public class LikesService {
      *  вывод наиболее популярных фильмов по количеству лайков
      */
     public Collection<Film> findPopularFilm(Integer size) {
-        return likesStorage.findPopularFilm(size);
+        Collection<Film> popFilms = likesStorage.findPopularFilm(size);
+        for (Film film: popFilms) {
+            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film))); //получаем жанры фильма и добавляем к обьекту
+        }
+            return popFilms;
     }
 
 }

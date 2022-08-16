@@ -60,7 +60,7 @@ public class FilmService {
     public Film get(long filmId) {
         final Film film = filmStorage.get(filmId);
         if (film == null) {
-            throw new NotFoundException("User with id=" + filmId + "not found");
+            throw new NotFoundException("Film with id=" + filmId + "not found");
         }
         film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film))); //получаем жанры фильма и добавляем к обьекту
         return film;
@@ -71,6 +71,18 @@ public class FilmService {
      */
     public Collection<Film> findAllFilms() {
         return filmStorage.findAll();
+    }
+
+
+    /**
+     * удаление фильма по Id
+     */
+    public void deleteFilmById(long filmId) {
+        final Film film = filmStorage.get(filmId);
+        if (film == null) {
+            throw new NotFoundException("Film with id=" + filmId + "not found");
+        }
+        filmStorage.removeFilmById(filmId);
     }
 
 }

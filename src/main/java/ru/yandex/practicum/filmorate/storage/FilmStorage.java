@@ -15,4 +15,6 @@ public interface FilmStorage {
     Film get(long filmId);
 
     Collection<Film> findAll();
+
+    void removeFilmById(long filmId);
 }
