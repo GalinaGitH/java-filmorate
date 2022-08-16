@@ -38,10 +38,10 @@ create table IF NOT EXISTS LIKES
 (
     USER_ID BIGINT not null,
     FILM_ID BIGINT not null,
-    constraint LIKES_PK
-        primary key (USER_ID),
+    --constraint LIKES_PK
+       --primary key (USER_ID) ,
     constraint LIKES_FILMS_FILM_ID_FK
-        foreign key (FILM_ID) references FILMS,
+        foreign key (FILM_ID) references FILMS ON DELETE CASCADE,
     constraint LIKES_USERS_USER_ID_FK
         foreign key (USER_ID) references USERS
 );
@@ -52,9 +52,9 @@ create table IF NOT EXISTS FRIENDS
     FRIEND_ID     BIGINT  not null,
     FRIEND_STATUS BOOLEAN ,
     constraint FRIENDS_FK
-        foreign key (FRIEND_ID) references USERS(USER_ID),
+        foreign key (FRIEND_ID) references USERS(USER_ID) ON DELETE CASCADE,
     constraint FRIENDS_FK_TWO
-       foreign key (USER_ID) references USERS(USER_ID)
+       foreign key (USER_ID) references USERS(USER_ID) ON DELETE CASCADE
 );
 
 create table IF NOT EXISTS GENRE_NAMES
@@ -70,9 +70,9 @@ create table IF NOT EXISTS FILM_GENRES
     FILM_ID  BIGINT  not null,
     GENRE_ID INTEGER not null,
     constraint GENRES_FK
-        foreign key (GENRE_ID) references GENRE_NAMES,
+        foreign key (GENRE_ID) references GENRE_NAMES ON DELETE RESTRICT,
     constraint GENRES_FK_TWO
-        foreign key (FILM_ID) references FILMS
+        foreign key (FILM_ID) references FILMS ON DELETE CASCADE
 );
 
 

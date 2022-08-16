@@ -69,4 +69,15 @@ public class UserService {
         }
         return user;
     }
+    /**
+     * удаление пользователя по id
+     */
+    public void deleteUserById(long userId) {
+        final User user = userStorage.get(userId);
+        if (user == null) {
+            throw new NotFoundException("User with id=" + userId + "not found");
+        }
+        userStorage.removeUserById(userId);
+    }
+
 }

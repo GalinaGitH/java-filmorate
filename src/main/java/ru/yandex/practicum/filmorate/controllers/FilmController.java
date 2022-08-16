@@ -78,6 +78,12 @@ public class FilmController {
         return likesService.findPopularFilm(count);
     }
 
+    @DeleteMapping("/films/{filmId}")
+    public void deleteFilmById(@PathVariable long filmId) {
+        filmService.deleteFilmById(filmId);
+        log.debug("Фильм с id = {} удален из списка", filmId);
+    }
+
 }
 
 
