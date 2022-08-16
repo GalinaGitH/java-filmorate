@@ -122,16 +122,4 @@ public class FilmService {
         filmStorage.removeFilmById(filmId);
     }
 
-
-    /**
-     * удаление фильма по Id
-     */
-    public void deleteFilmById(long filmId) {
-        final Film film = filmStorage.get(filmId);
-        if (film == null) {
-            throw new NotFoundException("Film with id=" + filmId + "not found");
-        }
-        filmStorage.removeFilmById(filmId);
-    }
-
 }
