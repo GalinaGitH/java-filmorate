@@ -97,4 +97,10 @@ public class FilmDbStorage implements FilmStorage {
                 "Join MPA ON MPA.MPA_ID=FILMS.MPA_ID";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
     }
+    @Override
+    public void removeFilmById(long filmId){
+        String sqlQuery = "delete from FILMS where FILM_ID = ?";
+        jdbcTemplate.update(sqlQuery, filmId);
+    }
+
 }

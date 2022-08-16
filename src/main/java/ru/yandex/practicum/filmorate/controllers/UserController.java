@@ -77,5 +77,12 @@ public class UserController {
         log.debug("Количество друзей: {}", friendsService.getListOfFriends(userId).size());
         return friendsService.getListOfFriends(userId);
     }
+
+    @DeleteMapping("/users/{id}")
+    public void deleteUser(@PathVariable("id") long userId) {
+        userService.deleteUserById(userId);
+        log.debug("Пользователь с id= {} удален из списка", userId);
+    }
+
 }
 

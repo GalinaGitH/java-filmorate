@@ -78,6 +78,25 @@ public class FilmController {
         return likesService.findPopularFilm(count);
     }
 
+    @GetMapping("/films/director/{directorId}")
+    public Collection<Film> sortByFilm(@PathVariable int directorId, @RequestParam String sortBy) {
+        if ("year".equals(sortBy)) {
+            log.debug("Сортируем список фильмов конкретного режиссера с id={} по годам", directorId);
+            return filmService.findAllFilmsOfDirectorSortedByYear(directorId);
+        } else if ("likes".equals(sortBy)) {
+            log.debug("Сортируем список фильмов конкретного режиссера с id={} по лайкам", directorId);
+            return filmService.findAllFilmsOfDirectorSortedByLikes(directorId);
+        } else {
+            log.debug("Ошибка в параметре {}", sortBy);
+            return null;
+        }
+    }
+    @DeleteMapping("/films/{filmId}")
+    public void deleteFilmById(@PathVariable long filmId) {
+        filmService.deleteFilmById(filmId);
+        log.debug("Фильм с id = {} удален из списка", filmId);
+    }
+
 }
 
 
