@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
-import net.minidev.json.annotate.JsonIgnore;
 import ru.yandex.practicum.filmorate.controllers.After;
 
 import javax.validation.constraints.Min;
@@ -9,7 +8,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 @Builder
@@ -32,6 +30,7 @@ public class Film {
     @NotNull
     Mpa mpa; //рейтинг фильма
     private Set<Genre> genres; //информация о жанрах
+    private Set<Director> directors; //режиссеры
 
     public Film(long id, String name, LocalDate releaseDate, String description, long duration) {
         this.id = id;
