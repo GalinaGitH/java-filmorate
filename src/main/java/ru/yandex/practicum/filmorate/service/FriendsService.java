@@ -16,6 +16,8 @@ public class FriendsService {
     private final FriendStorage friendStorage;
     private final UserStorage userStorage;
 
+    private final FeedService feedService;
+
     /**
      * добавление в друзья
      * Условие:
@@ -26,6 +28,7 @@ public class FriendsService {
         if (user == null || friend == null) {
             throw new NotFoundException("User  not found");
         }
+        feedService.addFriendInFeed(userId, friendId);
         friendStorage.addFriend(userId, friendId);
     }
 
@@ -38,6 +41,7 @@ public class FriendsService {
         if (user == null || friend == null) {
             throw new NotFoundException("User  not found");
         }
+        feedService.removeFriendInFeed(userId, friendId);
         friendStorage.removeFriend(userId, friendId);
     }
 

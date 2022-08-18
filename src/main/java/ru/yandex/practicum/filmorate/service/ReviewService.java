@@ -25,6 +25,8 @@ public class ReviewService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
+    private final FeedService feedService;
+
     /**
      * сохранение отзыва
      */
@@ -39,7 +41,9 @@ public class ReviewService {
         }
         final Review reviewFromStorage = reviewStorage.get(review.getReviewId());
         if (reviewFromStorage == null) {
-            return reviewStorage.create(review);
+            Review newReview = reviewStorage.create(review);
+            feedService.addReviewFilmInFeed(newReview.getUserId(), newReview.getReviewId());
+            return newReview;
         } else throw new AlreadyExistException(String.format(
                 "отзыв с таким id %s уже зарегистрирован.", review.getReviewId()));
     }
@@ -52,6 +56,7 @@ public class ReviewService {
         if (reviewFromStorage == null) {
             throw new NotFoundException("Review with id=" + review.getReviewId() + "not found");
         }
+        feedService.updateReviewFilmInFeed(reviewFromStorage.getUserId(), reviewFromStorage.getReviewId());
         reviewStorage.update(review);
         return review;
     }
@@ -64,6 +69,7 @@ public class ReviewService {
         if (reviewFromStorage == null) {
             throw new NotFoundException("Review with id=" + reviewId + "not found");
         }
+        feedService.removeReviewFilmInFeed(reviewFromStorage.getUserId(), reviewId);
         reviewStorage.remove(reviewId);
     }
 

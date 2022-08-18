@@ -6,12 +6,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.FriendsService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 import java.util.*;
 
 @Validated
@@ -21,11 +22,13 @@ public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private UserService userService;
     private FriendsService friendsService;
+    private FeedService feedService;
 
     @Autowired
-    public UserController(UserService userService, FriendsService friendsService) {
+    public UserController(UserService userService, FriendsService friendsService, FeedService feedService) {
         this.userService = userService;
         this.friendsService = friendsService;
+        this.feedService = feedService;
     }
 
     @GetMapping("/users")
@@ -38,6 +41,12 @@ public class UserController {
     public User getUser(@PathVariable long userId) {
         log.info("Get user by id={}", userId);
         return userService.get(userId);
+    }
+
+    @GetMapping("/users/{userId}/feed")
+    public List<Feed> getFeeds(@PathVariable int userId) {
+        log.info("Get feeds user by id={}", userId);
+        return feedService.getFeeds(userId);
     }
 
     @PostMapping(value = "/users")
