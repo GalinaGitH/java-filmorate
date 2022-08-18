@@ -15,6 +15,7 @@ import java.sql.*;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @Primary
@@ -135,4 +136,30 @@ public class FilmDbStorage implements FilmStorage {
         List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId);
         return films;
     }
+    @Override
+    public Collection<Film> search(String query, List<String> by) {
+        List<String> params = new ArrayList<>();
+        List<String> whereParts =  Map.of(
+                "director", "LOWER(DIRECTOR_NAME) LIKE ?",
+                "title", "LOWER(FILM_NAME) LIKE ?")
+                .entrySet()
+                .stream()
+                .filter(entry -> by.contains(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .peek(entry -> params.add("%" + query.toLowerCase() + "%"))
+                .collect(Collectors.toList());
+        StringBuilder qbuilder = new StringBuilder();
+        qbuilder
+                .append(" SELECT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILM_DURATION, MPA.MPA_ID, MPA.MPA_TYPE, DIRECTOR_NAME")
+                .append(" FROM")
+                .append(" FILMS LEFT JOIN MPA ON MPA.MPA_ID=FILMS.MPA_ID LEFT JOIN FILM_DIRECTORS")
+                .append(" ON FILMS.FILM_ID = FILM_DIRECTORS.FILM_ID")
+                .append(" LEFT JOIN DIRECTORS ON DIRECTORS.DIRECTOR_ID = FILM_DIRECTORS.DIRECTOR_ID")
+                .append(" WHERE ")
+                .append(String.join(" OR ", whereParts))
+                .append(" ORDER BY FILMS.FILM_ID DESC")
+                .append(";");
+        return jdbcTemplate.query(qbuilder.toString(), this::mapRowToFilm, params.toArray());
+    }
+
 }
