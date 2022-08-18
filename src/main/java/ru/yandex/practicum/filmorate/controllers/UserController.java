@@ -6,13 +6,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.FriendsService;
+import ru.yandex.practicum.filmorate.service.LikesService;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import java.util.*;
 
 @Validated
@@ -24,10 +29,17 @@ public class UserController {
     private FriendsService friendsService;
     private FeedService feedService;
 
+    private LikesService likesService;
+
+    private FilmService filmService;
+
     @Autowired
-    public UserController(UserService userService, FriendsService friendsService, FeedService feedService) {
+    public UserController(UserService userService, FriendsService friendsService, LikesService likesService,
+                          FilmService filmService, FeedService feedService) {
         this.userService = userService;
         this.friendsService = friendsService;
+        this.likesService = likesService;
+        this.filmService = filmService;
         this.feedService = feedService;
     }
 
@@ -93,5 +105,12 @@ public class UserController {
         log.debug("Пользователь с id= {} удален из списка", userId);
     }
 
+
+    @GetMapping("/users/{id}/recommendations")
+    public Collection<Film> getRecommendations(@PathVariable long id) {
+        List<Film> recFilms = filmService.getRecommended(id);
+        log.debug("Количество рекомендованных фильмов: {}", recFilms.size());
+        return recFilms;
+    }
 }
 
