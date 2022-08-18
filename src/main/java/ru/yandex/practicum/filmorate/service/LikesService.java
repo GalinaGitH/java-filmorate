@@ -23,6 +23,8 @@ public class LikesService {
     private final UserStorage userStorage;
     private final GenreStorage genreStorage;
 
+    private final FeedService feedService;
+
     /**
      * добавление лайка
      */
@@ -31,11 +33,12 @@ public class LikesService {
         if (film == null) {
             throw new NotFoundException("Film  not found");
         }
+        feedService.addLikeFilmInFeed(filmId, userId);
         likesStorage.addLikes(filmId, userId);
     }
 
     /**
-     *  удаление лайка
+     * удаление лайка
      */
     public void removeLikes(long filmId, long userId) {
         final Film film = filmStorage.get(filmId);
@@ -43,18 +46,19 @@ public class LikesService {
         if (film == null || user == null) {
             throw new NotFoundException("Film or User  not found");
         }
+        feedService.removeLikeFilmInFeed(filmId, userId);
         likesStorage.removeLikes(filmId, userId);
     }
 
     /**
-     *  вывод наиболее популярных фильмов по количеству лайков
+     * вывод наиболее популярных фильмов по количеству лайков
      */
     public Collection<Film> findPopularFilm(Integer size) {
         Collection<Film> popFilms = likesStorage.findPopularFilm(size);
-        for (Film film: popFilms) {
+        for (Film film : popFilms) {
             film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film))); //получаем жанры фильма и добавляем к обьекту
         }
-            return popFilms;
+        return popFilms;
     }
 
 }
