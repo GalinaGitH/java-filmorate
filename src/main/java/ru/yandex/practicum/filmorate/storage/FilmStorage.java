@@ -21,6 +21,8 @@ public interface FilmStorage {
 
     void removeFilmById(long filmId);
 
+    Collection<Film> search(String query, List<String> by);
+
     List<Film> getRecommended(Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms, long userid);
 
     List<Film> getLikedByUser(long userId);

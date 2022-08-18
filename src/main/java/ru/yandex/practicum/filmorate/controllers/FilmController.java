@@ -78,6 +78,12 @@ public class FilmController {
         return likesService.findPopularFilm(count);
     }
 
+    @GetMapping("/films/search")
+    public Collection<Film> searchFilm(@RequestParam String query, @RequestParam List<String> by) {
+        log.debug("Поиск по фильмам {}, {}", query, by);
+        return filmService.searchFilm(query, by);
+    }
+
     @GetMapping("/films/director/{directorId}")
     public Collection<Film> sortByFilm(@PathVariable int directorId, @RequestParam String sortBy) {
         if ("year".equals(sortBy)) {

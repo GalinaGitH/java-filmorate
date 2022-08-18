@@ -6,6 +6,10 @@ import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.*;
 import java.util.function.Function;
@@ -150,4 +154,13 @@ public class FilmService {
         return preparedData;
     }
 
+    public Collection<Film> searchFilm(String query, List<String> by) {
+        Collection<Film> filmsFromStorage = filmStorage.search(query, by);
+        for (Film film : filmsFromStorage) {
+            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
+            film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
+        }
+
+        return filmsFromStorage;
+    }
 }
