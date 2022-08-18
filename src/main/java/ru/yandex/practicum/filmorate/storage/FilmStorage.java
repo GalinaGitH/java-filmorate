@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.storage;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public interface FilmStorage {
@@ -18,4 +20,8 @@ public interface FilmStorage {
     Collection<Film> findAll();
 
     void removeFilmById(long filmId);
+
+    List<Film> getRecommended(Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms, long userid);
+
+    List<Film> getLikedByUser(long userId);
 }

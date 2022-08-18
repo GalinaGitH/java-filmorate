@@ -2,18 +2,14 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.storage.DirectorStorage;
-import ru.yandex.practicum.filmorate.storage.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.MpaStorage;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -23,6 +19,8 @@ public class FilmService {
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
     private final DirectorStorage directorStorage;
+
+    private final UserStorage userStorage;
 
     /**
      * добавление фильма
@@ -49,6 +47,9 @@ public class FilmService {
         filmStorage.update(film);
         genreStorage.setFilmGenre(film);//записываем жанры фильму,заполняем таблицу FILM_GENRES
         directorStorage.setFilmDirector(film);
+        if (film.getDirectors().isEmpty()) {
+            film.setDirectors(null);
+        }
         return film;
     }
 
@@ -120,6 +121,33 @@ public class FilmService {
             throw new NotFoundException("Film with id=" + filmId + "not found");
         }
         filmStorage.removeFilmById(filmId);
+    }
+
+    public List<Film> getRecommended(long id) {
+        final User user = userStorage.get(id);
+        if (user == null) {
+            throw new NotFoundException("User  not found");
+        }
+        Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms = prepareDataForSlopeOne();
+        List<Film> recFilms = filmStorage.getRecommended(idsUsersAndIdsFilms, id);
+        for (Film film : recFilms) {
+            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
+            film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
+        }
+        return recFilms;
+    }
+
+    private Map<Long, HashMap<Long, Double>> prepareDataForSlopeOne() {
+        Map<Long, HashMap<Long, Double>> preparedData = new HashMap<>();
+        List<Long> idsUsers = userStorage.findAllUsers().stream().map(User::getId).collect(Collectors.toList());
+        for (Long idUser : idsUsers) {
+            List<Film> likedFilms = filmStorage.getLikedByUser(idUser);
+            if (likedFilms != null) {
+                Map<Long, Double> idsFilm = likedFilms.stream().collect(Collectors.toMap(Film::getId, val-> 1.0));
+                preparedData.put(idUser, (HashMap<Long, Double>) idsFilm);
+            }
+        }
+        return preparedData;
     }
 
 }

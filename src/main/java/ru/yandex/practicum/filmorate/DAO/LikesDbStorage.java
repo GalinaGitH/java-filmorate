@@ -10,7 +10,11 @@ import ru.yandex.practicum.filmorate.storage.LikesStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 
 @Repository
@@ -59,4 +63,5 @@ public class LikesDbStorage implements LikesStorage {
                 .build();
         return film;
     }
+
 }
