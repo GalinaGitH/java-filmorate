@@ -136,6 +136,19 @@ public class FilmDbStorage implements FilmStorage {
         List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId);
         return films;
     }
+
+    @Override
+    public List<Film> getLikedByUserSortedPopular(long userId) {
+        String sqlQuery = "SELECT DISTINCT FILMS.FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION, COUNT(L.USER_ID) AS CNT, " +
+                " MPA.MPA_ID, MPA_TYPE, L.USER_ID " +
+                " FROM FILMS JOIN LIKES AS L ON FILMS.FILM_ID = L.FILM_ID " +
+                " JOIN MPA  ON MPA.MPA_ID = FILMS.MPA_ID " +
+                " WHERE L.USER_ID = ? " +
+                " GROUP BY FILMS.FILM_ID " +
+                " ORDER BY CNT DESC;";
+        List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId);
+        return films;
+    }
     @Override
     public Collection<Film> search(String query, List<String> by) {
         List<String> params = new ArrayList<>();

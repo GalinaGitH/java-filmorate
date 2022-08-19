@@ -163,4 +163,16 @@ public class FilmService {
 
         return filmsFromStorage;
     }
+
+    public Collection<Film> findCommonFilms(long userId, long friendId) {
+        Collection<Film> UserLikedFilms = filmStorage.getLikedByUserSortedPopular(userId);
+        Collection<Film> FriendLikedFilms = filmStorage.getLikedByUserSortedPopular(friendId);
+        if (UserLikedFilms.size() == 0 || FriendLikedFilms.size() == 0) {
+            Collection<Film> commonFilmsEmpty = new ArrayList<>();
+            return commonFilmsEmpty;
+        }
+        return (FriendLikedFilms.stream()
+                .filter(UserLikedFilms::contains)
+                .collect(Collectors.toList()));
+    }
 }

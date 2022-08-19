@@ -104,6 +104,12 @@ public class FilmController {
         log.debug("Фильм с id = {} удален из списка", filmId);
     }
 
+    @GetMapping("/films/common")
+    public Collection<Film> findCommonFilms(@RequestParam String userId, @RequestParam String friendId) {
+        log.debug("Список ощих фильмов пользователя с Id={} и пользователя с id={} по популярности", userId, friendId);
+        return filmService.findCommonFilms(Long.parseLong(userId), Long.parseLong(friendId));
+    }
+
 }
 
 
