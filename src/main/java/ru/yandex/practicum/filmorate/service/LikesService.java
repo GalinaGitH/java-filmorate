@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
 
 @Service
@@ -62,4 +61,27 @@ public class LikesService {
         return popFilms;
     }
 
+    public Collection<Film> findPopularFilmsByGenresAndYear(Integer limit, int year, int genreId) {
+        Collection<Film> popularFilms = likesStorage.findPopularFilmsByYearAndGenres(limit, year, genreId);
+        for (Film film : popularFilms) {
+            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film))); //получаем жанры фильма и добавляем к обьекту
+        }
+        return popularFilms;
+    }
+
+    public Collection<Film> findPopularFilmsByYear(Integer limit, int year) {
+        Collection<Film> popularFilms = likesStorage.findPopularFilmsByYear(limit, year);
+        for (Film film : popularFilms) {
+            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film))); //получаем жанры фильма и добавляем к обьекту
+        }
+        return popularFilms;
+    }
+
+    public Collection<Film> findPopularFilmsByGenre(Integer limit, int genreId) {
+        Collection<Film> popularFilms = likesStorage.findPopularFilmsByGenre(limit, genreId);
+        for (Film film : popularFilms) {
+            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film))); //получаем жанры фильма и добавляем к обьекту
+        }
+        return popularFilms;
+    }
 }
