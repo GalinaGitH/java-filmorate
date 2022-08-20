@@ -8,13 +8,11 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 
+import javax.xml.crypto.Data;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 
 @Repository
@@ -63,5 +61,64 @@ public class LikesDbStorage implements LikesStorage {
                 .build();
         return film;
     }
+    @Override
+    public Collection<Film> findPopularFilmsByYearAndGenres(Integer limit, int year, int genreId) {
+        String sqlQuery = "SELECT FILMS.FILM_ID, FILMS.FILM_NAME , FILMS.FILM_RELEASE_DATE , " +
+                "FILMS.FILM_DESCRIPTION ,FILMS.FILM_DURATION, FILMS.MPA_ID, "  +
+                "MPA.MPA_ID, MPA.MPA_TYPE, " +
+                "FILM_GENRES.FILM_ID, FILM_GENRES.GENRE_ID, " +
+                "GENRE_NAMES.GENRE_NAME, " +
+                "STATISTIC.CNT " +
+                "FROM FILMS INNER JOIN (SELECT FILMS.FILM_ID, COUNT(LIKES.FILM_ID) AS CNT " +
+                                "FROM FILMS " +
+                                "LEFT JOIN LIKES on FILMS.FILM_ID = LIKES.FILM_ID " +
+                                "GROUP BY FILMS.FILM_ID ) AS STATISTIC ON FILMS.FILM_ID = STATISTIC.FILM_ID " +
+                "LEFT JOIN MPA ON MPA.MPA_ID = FILMS.MPA_ID " +
+                "JOIN FILM_GENRES ON FILMS.FILM_ID = FILM_GENRES.FILM_ID " +
+                "JOIN GENRE_NAMES ON FILM_GENRES.GENRE_ID = GENRE_NAMES.GENRE_ID "+
+                "WHERE CAST(EXTRACT(YEAR FROM FILMS.FILM_RELEASE_DATE) AS INTEGER) = ? AND " +
+                "GENRE_NAMES.GENRE_ID = ? " +
+                "ORDER BY STATISTIC.CNT DESC " +
+                "LIMIT ?";
 
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, year, genreId, limit);
+    }
+
+    @Override
+    public Collection<Film> findPopularFilmsByYear(Integer limit, int year) {
+        String sqlQuery = "SELECT FILMS.FILM_ID, FILMS.FILM_NAME , FILMS.FILM_RELEASE_DATE , " +
+                "FILMS.FILM_DESCRIPTION ,FILMS.FILM_DURATION, FILMS.MPA_ID, "  +
+                "MPA.MPA_ID, MPA.MPA_TYPE, " +
+                "STATISTIC.CNT " +
+                "FROM FILMS INNER JOIN (SELECT FILMS.FILM_ID, COUNT(LIKES.FILM_ID) AS CNT " +
+                "FROM FILMS " +
+                "LEFT JOIN LIKES on FILMS.FILM_ID = LIKES.FILM_ID " +
+                "GROUP BY FILMS.FILM_ID ) AS STATISTIC ON FILMS.FILM_ID = STATISTIC.FILM_ID " +
+                "LEFT JOIN MPA ON MPA.MPA_ID = FILMS.MPA_ID " +
+                "WHERE CAST(EXTRACT(YEAR FROM FILMS.FILM_RELEASE_DATE) AS INTEGER) = ? " +
+                "ORDER BY STATISTIC.CNT DESC " +
+                "LIMIT ?";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, year, limit);
+    }
+
+    @Override
+    public Collection<Film> findPopularFilmsByGenre(Integer limit, int genreId) {
+        String sqlQuery = "SELECT FILMS.FILM_ID, FILMS.FILM_NAME , FILMS.FILM_RELEASE_DATE , " +
+                "FILMS.FILM_DESCRIPTION ,FILMS.FILM_DURATION, FILMS.MPA_ID, "  +
+                "MPA.MPA_ID, MPA.MPA_TYPE, " +
+                "FILM_GENRES.FILM_ID, FILM_GENRES.GENRE_ID, " +
+                "GENRE_NAMES.GENRE_NAME, " +
+                "STATISTIC.CNT " +
+                "FROM FILMS INNER JOIN (SELECT FILMS.FILM_ID, COUNT(LIKES.FILM_ID) AS CNT " +
+                "FROM FILMS " +
+                "LEFT JOIN LIKES on FILMS.FILM_ID = LIKES.FILM_ID " +
+                "GROUP BY FILMS.FILM_ID ) AS STATISTIC ON FILMS.FILM_ID = STATISTIC.FILM_ID " +
+                "LEFT JOIN MPA ON MPA.MPA_ID = FILMS.MPA_ID " +
+                "JOIN FILM_GENRES ON FILMS.FILM_ID = FILM_GENRES.FILM_ID " +
+                "JOIN GENRE_NAMES ON FILM_GENRES.GENRE_ID = GENRE_NAMES.GENRE_ID "+
+                "WHERE GENRE_NAMES.GENRE_ID = ? " +
+                "ORDER BY STATISTIC.CNT DESC " +
+                "LIMIT ?";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, genreId, limit);
+    }
 }
