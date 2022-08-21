@@ -3,16 +3,14 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.service.recommendation.RecommendationService;
 import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -25,6 +23,8 @@ public class FilmService {
     private final DirectorStorage directorStorage;
 
     private final UserStorage userStorage;
+
+    private final RecommendationService recommendationService;
 
     /**
      * добавление фильма
@@ -132,8 +132,10 @@ public class FilmService {
         if (user == null) {
             throw new NotFoundException("User  not found");
         }
-        Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms = prepareDataForSlopeOne();
-        List<Film> recFilms = filmStorage.getRecommended(idsUsersAndIdsFilms, id);
+        Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms = prepareUsersFilmsForRecommendationService();
+        recommendationService.setUsersItemsMap(idsUsersAndIdsFilms);
+        List<Long> recIdsFilms = recommendationService.getRecommendedIdsItemForUser(id);
+        List<Film> recFilms = filmStorage.getFilmsFromIds(recIdsFilms);
         for (Film film : recFilms) {
             film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
             film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
@@ -141,7 +143,8 @@ public class FilmService {
         return recFilms;
     }
 
-    private Map<Long, HashMap<Long, Double>> prepareDataForSlopeOne() {
+
+    private Map<Long, HashMap<Long, Double>> prepareUsersFilmsForRecommendationService() {
         Map<Long, HashMap<Long, Double>> preparedData = new HashMap<>();
         List<Long> idsUsers = userStorage.findAllUsers().stream().map(User::getId).collect(Collectors.toList());
         for (Long idUser : idsUsers) {
