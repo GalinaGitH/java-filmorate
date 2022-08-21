@@ -108,6 +108,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+
     public List<Film> getRecommended(Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms, long id) {
         SlopeOne slopeOne = new SlopeOne(idsUsersAndIdsFilms, id);
         List<Long> idsRecFilms = slopeOne.getRecommendedIdsFilm();
@@ -116,6 +117,9 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private List<Film> getFilmsFromIds(List<Long> idFilms) {
+
+    public List<Film> getFilmsFromIds(List <Long> idFilms) {
+
         String sql = String.join(",", Collections.nCopies(idFilms.size(), "?"));
         sql = String.format("select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION ," +
                 " MPA.MPA_ID, MPA.MPA_TYPE " +

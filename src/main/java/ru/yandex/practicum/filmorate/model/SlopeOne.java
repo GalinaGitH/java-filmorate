@@ -13,7 +13,7 @@ public class SlopeOne {
         this.inputIdUser = inputIdUser;
     }
 
-    private static List<Long> getAllUsersItems(Map<Long, HashMap<Long, Double>> input, Long userId) {
+private static List<Long> getAllUsersItems(Map<Long, HashMap<Long, Double>> input, Long userId) {
         for (Long id : input.keySet()) {
             if (Objects.equals(id, userId)) {
                 return new ArrayList<>(input.get(id).keySet());
@@ -32,6 +32,10 @@ public class SlopeOne {
     }
 
     public List<Long> getRecommendedIdsFilm() {
+
+
+    public List<Long> getRecommendedIdsItemForUser(long idUser) {
+
         buildDifferencesMatrixInt(inputDataInt);
         HashMap<Long, Double> recomendationFilmId = predictInt(inputIdUser);
 
