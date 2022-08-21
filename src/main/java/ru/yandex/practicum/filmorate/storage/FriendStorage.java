@@ -11,5 +11,5 @@ public interface FriendStorage {
 
     Collection<User> findAllCommonFriends(long userId, long friendId);
 
-    public Collection<User> getListOfFriends(long userId);
+    Collection<User> getListOfFriends(long userId);
 }

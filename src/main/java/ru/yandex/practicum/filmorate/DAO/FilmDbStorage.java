@@ -11,8 +11,8 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.SlopeOne;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -92,6 +92,7 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
         return film;
     }
+
     @Override
     public Collection<Film> findAll() {
         String sqlQuery = "select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION , MPA.MPA_ID, MPA.MPA_TYPE " +
@@ -99,8 +100,9 @@ public class FilmDbStorage implements FilmStorage {
                 "Join MPA ON MPA.MPA_ID=FILMS.MPA_ID";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
     }
+
     @Override
-    public void removeFilmById(long filmId){
+    public void removeFilmById(long filmId) {
         String sqlQuery = "delete from FILMS where FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, filmId);
     }
@@ -113,7 +115,7 @@ public class FilmDbStorage implements FilmStorage {
         return filmsFromIds;
     }
 
-    private List<Film> getFilmsFromIds(List <Long> idFilms) {
+    private List<Film> getFilmsFromIds(List<Long> idFilms) {
         String sql = String.join(",", Collections.nCopies(idFilms.size(), "?"));
         sql = String.format("select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION ," +
                 " MPA.MPA_ID, MPA.MPA_TYPE " +
@@ -149,12 +151,13 @@ public class FilmDbStorage implements FilmStorage {
         List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId);
         return films;
     }
+
     @Override
     public Collection<Film> search(String query, List<String> by) {
         List<String> params = new ArrayList<>();
-        List<String> whereParts =  Map.of(
-                "director", "LOWER(DIRECTOR_NAME) LIKE ?",
-                "title", "LOWER(FILM_NAME) LIKE ?")
+        List<String> whereParts = Map.of(
+                        "director", "LOWER(DIRECTOR_NAME) LIKE ?",
+                        "title", "LOWER(FILM_NAME) LIKE ?")
                 .entrySet()
                 .stream()
                 .filter(entry -> by.contains(entry.getKey()))

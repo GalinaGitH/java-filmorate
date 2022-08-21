@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS FILM_GENRES CASCADE ;
 DROP TABLE IF EXISTS FILMS CASCADE ;
 DROP TABLE IF EXISTS FRIENDS CASCADE ;
@@ -155,5 +154,3 @@ create table IF NOT EXISTS FEEDS
         foreign key (USER_ID) references USERS
             on delete cascade
 );
-
-

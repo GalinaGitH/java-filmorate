@@ -32,13 +32,9 @@ public class ReviewService {
      */
     public Review saveReview(Review review) {
         final User userInStorage = userStorage.get(review.getUserId());
-        if (userInStorage == null) {
-            throw new NotFoundException("User with id=" + review.getUserId() + "not found");
-        }
         final Film film = filmStorage.get(review.getFilmId());
-        if (film == null) {
-            throw new NotFoundException("Film with id=" + review.getFilmId() + "not found");
-        }
+        checkUser(userInStorage);
+        checkFilm(film);
         final Review reviewFromStorage = reviewStorage.get(review.getReviewId());
         if (reviewFromStorage == null) {
             Review newReview = reviewStorage.create(review);
@@ -53,9 +49,7 @@ public class ReviewService {
      */
     public Review updateReview(Review review) {
         final Review reviewFromStorage = reviewStorage.get(review.getReviewId());
-        if (reviewFromStorage == null) {
-            throw new NotFoundException("Review with id=" + review.getReviewId() + "not found");
-        }
+        checkReview(reviewFromStorage);
         feedService.updateReviewFilmInFeed(reviewFromStorage.getUserId(), reviewFromStorage.getReviewId());
         reviewStorage.update(review);
         return review;
@@ -66,9 +60,6 @@ public class ReviewService {
      */
     public void deleteReviewById(long reviewId) {
         final Review reviewFromStorage = reviewStorage.get(reviewId);
-        if (reviewFromStorage == null) {
-            throw new NotFoundException("Review with id=" + reviewId + "not found");
-        }
         feedService.removeReviewFilmInFeed(reviewFromStorage.getUserId(), reviewId);
         reviewStorage.remove(reviewId);
     }
@@ -78,23 +69,8 @@ public class ReviewService {
      */
     public Review get(long reviewId) {
         final Review reviewFromStorage = reviewStorage.get(reviewId);
-        if (reviewFromStorage == null) {
-            throw new NotFoundException("Review with id=" + reviewId + "not found");
-        }
+        checkReview(reviewFromStorage);
         return reviewFromStorage;
-    }
-
-
-    /**
-     * Получение всех отзывов по идентификатору фильма,
-     * Если кол-во не указано то 10.
-     */
-    public Collection<Review> getAllReviewByFilmId(long filmId, int count) {
-        final Film filmFromStorage = filmStorage.get(filmId);
-        if (filmFromStorage == null) {
-            throw new NotFoundException("Film with id=" + filmId + "not found");
-        }
-        return reviewStorage.getReviewByFilmId(filmId, count);
     }
 
     /**
@@ -109,13 +85,9 @@ public class ReviewService {
      */
     public void likeReview(long userId, long reviewId) {
         final Review reviewFromStorage = reviewStorage.get(reviewId);
-        if (reviewFromStorage == null) {
-            throw new NotFoundException("Review with id=" + reviewId + "not found");
-        }
+        checkReview(reviewFromStorage);
         final User userInStorage = userStorage.get(userId);
-        if (userInStorage == null) {
-            throw new NotFoundException("User with id=" + userId + "not found");
-        }
+        checkUser(userInStorage);
         ReviewLike reviewLike = new ReviewLike(userId, reviewId, true);
         reviewLikeStorage.create(reviewLike);
     }
@@ -125,13 +97,9 @@ public class ReviewService {
      */
     public void disLikeReview(long userId, long reviewId) {
         final Review reviewFromStorage = reviewStorage.get(reviewId);
-        if (reviewFromStorage == null) {
-            throw new NotFoundException("Review with id=" + reviewId + "not found");
-        }
+        checkReview(reviewFromStorage);
         final User userInStorage = userStorage.get(userId);
-        if (userInStorage == null) {
-            throw new NotFoundException("User with id=" + userId + "not found");
-        }
+        checkUser(userInStorage);
         ReviewLike reviewLike = new ReviewLike(userId, reviewId, false);
         reviewLikeStorage.create(reviewLike);
     }
@@ -144,4 +112,36 @@ public class ReviewService {
         reviewLikeStorage.removeReviewLike(reviewLike);
     }
 
+    /**
+     * Получение всех отзывов по идентификатору фильма,
+     * Если кол-во не указано то 10.
+     */
+    public Collection<Review> getAllReviewsByFilmId(Long filmId, int count) {
+        if (filmId == null) {
+            return reviewStorage.getAllReview(count);
+
+        } else {
+            final Film filmFromStorage = filmStorage.get(filmId);
+            checkFilm(filmFromStorage);
+            return reviewStorage.getReviewByFilmId(filmId, count);
+        }
+    }
+
+    private void checkReview(Review reviewFromStorage) {
+        if (reviewFromStorage == null) {
+            throw new NotFoundException("Review not found");
+        }
+    }
+
+    private void checkUser(User userInStorage) {
+        if (userInStorage == null) {
+            throw new NotFoundException("User not found");
+        }
+    }
+
+    private void checkFilm(Film filmFromStorage) {
+        if (filmFromStorage == null) {
+            throw new NotFoundException("Film not found");
+        }
+    }
 }

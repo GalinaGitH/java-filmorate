@@ -12,7 +12,8 @@ import ru.yandex.practicum.filmorate.service.LikesService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 @RestController
 @Validated
@@ -77,16 +78,8 @@ public class FilmController {
 
     @GetMapping("/films/director/{directorId}")
     public Collection<Film> sortByFilm(@PathVariable int directorId, @RequestParam String sortBy) {
-        if ("year".equals(sortBy)) {
-            log.debug("Сортируем список фильмов конкретного режиссера с id={} по годам", directorId);
-            return filmService.findAllFilmsOfDirectorSortedByYear(directorId);
-        } else if ("likes".equals(sortBy)) {
-            log.debug("Сортируем список фильмов конкретного режиссера с id={} по лайкам", directorId);
-            return filmService.findAllFilmsOfDirectorSortedByLikes(directorId);
-        } else {
-            log.debug("Ошибка в параметре {}", sortBy);
-            return null;
-        }
+        log.debug("Сортируем список фильмов конкретного режиссера с id={} по годам", directorId);
+        return filmService.findAllFilmsSortedByYearOrLikes(directorId, sortBy);
     }
 
     @DeleteMapping("/films/{filmId}")
@@ -103,20 +96,9 @@ public class FilmController {
 
     @GetMapping("/films/popular")
     public Collection<Film> findPopularFilmsByGenresAndYear(@RequestParam(defaultValue = "10", required = false) @Positive Integer count, @RequestParam(required = false) String year, @RequestParam(required = false) String genreId) {
-        if (genreId == null && year == null) {
-            log.debug("Список из {} самых популярных фильмов", count);
-            return likesService.findPopularFilm(count);
-        }
-        if (genreId == null  && year != null) {
-            log.debug("Список из {} самых популярных фильмов по году {}", count, year);
-            return likesService.findPopularFilmsByYear(count, Integer.parseInt(year));
-        }
-        if (genreId != null && year == null) {
-            log.debug("Список из {} самых популярных фильмов по жанру с Id={}", count, genreId);
-            return likesService.findPopularFilmsByGenre(count, Integer.parseInt(genreId));
-        }
         log.debug("Список из {} самых популярных фильмов по жанру с Id={} и году {}", count, year, genreId);
-        return likesService.findPopularFilmsByGenresAndYear(count, Integer.parseInt(year), Integer.parseInt(genreId));
+
+        return likesService.findPopularFilmsByGenresAndYear(count, year, genreId);
     }
 
 }

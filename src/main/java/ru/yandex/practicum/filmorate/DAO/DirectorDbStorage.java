@@ -154,7 +154,7 @@ public class DirectorDbStorage implements DirectorStorage {
             sortedFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, idDirector);
         }
 
-        return sortedFilms; 
+        return sortedFilms;
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {

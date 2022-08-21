@@ -3,14 +3,32 @@ package ru.yandex.practicum.filmorate.model;
 import java.util.*;
 
 public class SlopeOne {
-    private Map<Long, Map<Long, Double>> diffInt = new HashMap<>();
-    private Map<Long, Map<Long, Integer>> freqInt = new HashMap<>();
     private final Map<Long, HashMap<Long, Double>> inputDataInt;
     private final Long inputIdUser;
+    private final Map<Long, Map<Long, Double>> diffInt = new HashMap<>();
+    private final Map<Long, Map<Long, Integer>> freqInt = new HashMap<>();
 
     public SlopeOne(Map<Long, HashMap<Long, Double>> inputDataInt, Long inputIdUser) {
         this.inputDataInt = inputDataInt;
         this.inputIdUser = inputIdUser;
+    }
+
+    private static List<Long> getAllUsersItems(Map<Long, HashMap<Long, Double>> input, Long userId) {
+        for (Long id : input.keySet()) {
+            if (Objects.equals(id, userId)) {
+                return new ArrayList<>(input.get(id).keySet());
+            }
+        }
+        return null;
+    }
+
+    private static List<Long> getAllItemsExceptInputUsers(Map<Long, HashMap<Long, Double>> input) {
+        HashSet<Long> itemsStore = new HashSet<>();
+
+        for (Long userId : input.keySet()) {
+            itemsStore.addAll(input.get(userId).keySet());
+        }
+        return new ArrayList<Long>(itemsStore);
     }
 
     public List<Long> getRecommendedIdsFilm() {
@@ -92,7 +110,7 @@ public class SlopeOne {
             }
         }
 
-        List<Long> allItems= getAllItemsExceptInputUsers(inputDataInt);
+        List<Long> allItems = getAllItemsExceptInputUsers(inputDataInt);
 
 
         for (Long j : allItems) {
@@ -101,23 +119,6 @@ public class SlopeOne {
             }
         }
         return clean;
-    }
-    private static List<Long> getAllUsersItems(Map<Long, HashMap<Long, Double>> input, Long userId) {
-        for (Long id :input.keySet()) {
-            if (Objects.equals(id, userId)) {
-                return new ArrayList<>(input.get(id).keySet());
-            }
-        }
-        return null;
-    }
-
-    private static List<Long> getAllItemsExceptInputUsers(Map<Long, HashMap<Long, Double>> input) {
-        HashSet<Long> itemsStore = new HashSet<>();
-
-        for (Long userId:input.keySet()) {
-            itemsStore.addAll(input.get(userId).keySet());
-        }
-        return new ArrayList<Long>(itemsStore);
     }
 
 }
