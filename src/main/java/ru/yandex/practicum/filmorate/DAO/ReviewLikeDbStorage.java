@@ -29,6 +29,6 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
     @Override
     public void removeReviewLike(ReviewLike reviewLike) {
         String sqlQuery = "delete from REVIEW_LIKES where REVIEW_ID = ? AND USER_ID = ?";
-        jdbcTemplate.update(sqlQuery, reviewLike.getReviewId(),reviewLike.getUserId());
+        jdbcTemplate.update(sqlQuery, reviewLike.getReviewId(), reviewLike.getUserId());
     }
 }

@@ -2,12 +2,13 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.recommendation.RecommendationService;
 import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.*;
@@ -33,7 +34,7 @@ public class FilmService {
         final Film filmFromStorage = filmStorage.get(film.getId());
         if (filmFromStorage == null) {
             filmStorage.create(film);
-            genreStorage.setFilmGenre(film);//записываем жанры фильму,заполняем таблицу FILM_GENRES
+            genreStorage.setFilmGenre(film);
             directorStorage.setFilmDirector(film);
         } else throw new AlreadyExistException(String.format(
                 "Фильм с таким id %s уже зарегистрирован.", film.getId()));
@@ -49,7 +50,7 @@ public class FilmService {
             throw new NotFoundException("Film with id=" + film.getId() + "not found");
         }
         filmStorage.update(film);
-        genreStorage.setFilmGenre(film);//записываем жанры фильму,заполняем таблицу FILM_GENRES
+        genreStorage.setFilmGenre(film);
         directorStorage.setFilmDirector(film);
         if (film.getDirectors().isEmpty()) {
             film.setDirectors(null);
@@ -72,7 +73,7 @@ public class FilmService {
         if (film == null) {
             throw new NotFoundException("Film with id=" + filmId + "not found");
         }
-        film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film))); //получаем жанры фильма и добавляем к обьекту
+        film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
         film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
         return film;
     }
@@ -88,32 +89,6 @@ public class FilmService {
         }
 
         return filmsFromStorage;
-    }
-
-    public Collection<Film> findAllFilmsOfDirectorSortedByYear(int idDirector) {
-        final Director directorFromStorage = directorStorage.getById(idDirector);
-        if (directorFromStorage == null) {
-            throw new NotFoundException("Director with id=" + idDirector + "not found");
-        }
-        List<Film> sortedFilms = directorStorage.getSortedFilmsByYearOfDirector(idDirector);
-        for (Film film : sortedFilms) {
-            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
-            film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
-        }
-        return sortedFilms;
-    }
-
-    public Collection<Film> findAllFilmsOfDirectorSortedByLikes(int idDirector) {
-        final Director directorFromStorage = directorStorage.getById(idDirector);
-        if (directorFromStorage == null) {
-            throw new NotFoundException("Director with id=" + idDirector + "not found");
-        }
-        List<Film> sortedFilms = directorStorage.getSortedFilmsByLikesOfDirector(idDirector);
-        for (Film film : sortedFilms) {
-            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
-            film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
-        }
-        return sortedFilms;
     }
 
     /**
@@ -150,7 +125,7 @@ public class FilmService {
         for (Long idUser : idsUsers) {
             List<Film> likedFilms = filmStorage.getLikedByUser(idUser);
             if (likedFilms != null) {
-                Map<Long, Double> idsFilm = likedFilms.stream().collect(Collectors.toMap(Film::getId, val-> 1.0));
+                Map<Long, Double> idsFilm = likedFilms.stream().collect(Collectors.toMap(Film::getId, val -> 1.0));
                 preparedData.put(idUser, (HashMap<Long, Double>) idsFilm);
             }
         }
@@ -177,5 +152,34 @@ public class FilmService {
         return (FriendLikedFilms.stream()
                 .filter(UserLikedFilms::contains)
                 .collect(Collectors.toList()));
+    }
+
+    public Collection<Film> findAllFilmsSortedByYearOrLikes(int directorId, String sortBy) {
+        if ("year".equals(sortBy)) {
+            checkDirector(directorId);
+            List<Film> sortedFilms = directorStorage.getSortedFilmsByYearOfDirector(directorId);
+            return setDirectorsAndGenresToFilms(sortedFilms);
+        } else if ("likes".equals(sortBy)) {
+            checkDirector(directorId);
+            List<Film> sortedFilms = directorStorage.getSortedFilmsByLikesOfDirector(directorId);
+            return setDirectorsAndGenresToFilms(sortedFilms);
+        } else {
+            return null;
+        }
+    }
+
+    private void checkDirector(int idDirector) {
+        final Director directorFromStorage = directorStorage.getById(idDirector);
+        if (directorFromStorage == null) {
+            throw new NotFoundException("Director with id=" + idDirector + "not found");
+        }
+    }
+
+    private List<Film> setDirectorsAndGenresToFilms(List<Film> filmsFromStorage) {
+        for (Film film : filmsFromStorage) {
+            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
+            film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
+        }
+        return filmsFromStorage;
     }
 }

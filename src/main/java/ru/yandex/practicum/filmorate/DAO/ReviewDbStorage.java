@@ -10,7 +10,10 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -131,7 +134,7 @@ public class ReviewDbStorage implements ReviewStorage {
                     "FROM REVIEW_LIKES " +
                     "WHERE IS_USEFUL = FALSE AND REVIEW_ID = ?" +
                     "GROUP BY REVIEW_ID";
-            usefulRate = jdbcTemplate.queryForObject(sqlQuery, cashflowQuefyArgs, new int[]{Types.BIGINT, Types.BIGINT},Integer.class);
+            usefulRate = jdbcTemplate.queryForObject(sqlQuery, cashflowQuefyArgs, new int[]{Types.BIGINT, Types.BIGINT}, Integer.class);
         } catch (EmptyResultDataAccessException e) {
             return usefulRate;
         }

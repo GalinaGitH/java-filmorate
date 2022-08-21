@@ -3,17 +3,15 @@ package ru.yandex.practicum.filmorate.model;
 import java.util.*;
 
 public class SlopeOne {
-    private Map<Long, Map<Long, Double>> diffInt = new HashMap<>();
-    private Map<Long, Map<Long, Integer>> freqInt = new HashMap<>();
     private final Map<Long, HashMap<Long, Double>> inputDataInt;
     private final Long inputIdUser;
+    private final Map<Long, Map<Long, Double>> diffInt = new HashMap<>();
+    private final Map<Long, Map<Long, Integer>> freqInt = new HashMap<>();
 
     public SlopeOne(Map<Long, HashMap<Long, Double>> inputDataInt, Long inputIdUser) {
         this.inputDataInt = inputDataInt;
         this.inputIdUser = inputIdUser;
     }
-
-
 
     public List<Long> getRecommendedIdsItemForUser(long idUser) {
         buildDifferencesMatrixInt(inputDataInt);
@@ -94,7 +92,7 @@ public class SlopeOne {
             }
         }
 
-        List<Long> allItems= getAllItemsExceptInputUsers(inputDataInt);
+        List<Long> allItems = getAllItemsExceptInputUsers(inputDataInt);
 
 
         for (Long j : allItems) {

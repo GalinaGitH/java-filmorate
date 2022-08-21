@@ -27,5 +27,7 @@ public interface FilmStorage {
 
     Collection<Film> getLikedByUserSortedPopular(long userId);
 
+    List<Film> getRecommended(Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms, long id);
+
     List<Film> getFilmsFromIds(List <Long> idFilms);
 }

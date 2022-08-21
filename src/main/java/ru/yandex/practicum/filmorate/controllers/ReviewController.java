@@ -52,13 +52,8 @@ public class ReviewController {
 
     @GetMapping("/reviews")
     public Collection<Review> getAllReviewByFilmId(@RequestParam(required = false) Long filmId, @RequestParam(value = "count", defaultValue = "10", required = false) int count) {
-        if (filmId == null) {
-            log.debug("Список из {} полезных отзывов ", count);
-            return reviewService.getAllReview(count);
-        } else {
-            log.debug("Список отзывов фильма с filmid = {}", filmId);
-            return reviewService.getAllReviewByFilmId(filmId, count);
-        }
+        log.debug("Список отзывов фильма с filmid = {}", filmId);
+        return reviewService.getAllReviewsByFilmId(filmId, count);
     }
 
     @PutMapping(value = "/reviews/{id}/like/{userId}")
