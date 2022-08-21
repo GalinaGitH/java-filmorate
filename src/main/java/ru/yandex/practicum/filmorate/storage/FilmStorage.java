@@ -23,9 +23,9 @@ public interface FilmStorage {
 
     Collection<Film> search(String query, List<String> by);
 
-    List<Film> getRecommended(Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms, long userid);
-
     List<Film> getLikedByUser(long userId);
 
     Collection<Film> getLikedByUserSortedPopular(long userId);
+
+    List<Film> getFilmsFromIds(List <Long> idFilms);
 }

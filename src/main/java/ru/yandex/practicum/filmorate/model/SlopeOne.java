@@ -13,7 +13,9 @@ public class SlopeOne {
         this.inputIdUser = inputIdUser;
     }
 
-    public List<Long> getRecommendedIdsFilm() {
+
+
+    public List<Long> getRecommendedIdsItemForUser(long idUser) {
         buildDifferencesMatrixInt(inputDataInt);
         HashMap<Long, Double> recomendationFilmId = predictInt(inputIdUser);
 
