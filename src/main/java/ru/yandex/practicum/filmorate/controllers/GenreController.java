@@ -20,7 +20,7 @@ import java.util.List;
 public class GenreController {
     private static final Logger log = LoggerFactory.getLogger(GenreController.class);
 
-    private  GenreStorage genreStorage;
+    private GenreStorage genreStorage;
 
     @Autowired
     public GenreController(GenreStorage genreStorage) {

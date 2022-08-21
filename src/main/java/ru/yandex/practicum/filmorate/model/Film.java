@@ -18,6 +18,8 @@ import java.util.Set;
 @ToString
 @EqualsAndHashCode(of = "id")
 public class Film {
+    @NotNull
+    Mpa mpa; //рейтинг фильма
     private long id;
     @NotBlank(message = "название не может быть пустым и содержать пробелы")
     private String name; // название
@@ -27,8 +29,6 @@ public class Film {
     private String description; // описание
     @Min(value = 0, message = "продолжительность фильма должна быть положительной")
     private long duration; // длительность
-    @NotNull
-    Mpa mpa; //рейтинг фильма
     private Set<Genre> genres; //информация о жанрах
     private Set<Director> directors; //режиссеры
 

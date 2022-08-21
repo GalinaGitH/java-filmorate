@@ -19,6 +19,13 @@ public class MpaDbStorage implements MpaStorage {
         this.jdbcTemplate = jdbcTemplate;
 
     }
+
+    static Mpa makeMpa(ResultSet rs, int rowNum) throws SQLException {
+        return new Mpa(rs.getInt("MPA_ID"),
+                rs.getString("MPA_TYPE")
+        );
+    }
+
     @Override
     public Mpa getById(long id) {
         final String sqlQuery = "select MPA_ID ,MPA_TYPE " +
@@ -29,12 +36,6 @@ public class MpaDbStorage implements MpaStorage {
             return null;
         }
         return mpas.get(0);
-    }
-
-    static Mpa makeMpa(ResultSet rs, int rowNum) throws SQLException {
-        return new Mpa(rs.getInt("MPA_ID"),
-                rs.getString("MPA_TYPE")
-        );
     }
 
     @Override

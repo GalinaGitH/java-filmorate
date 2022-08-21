@@ -32,11 +32,12 @@ public class MpaController {
      */
     @GetMapping("/mpa/{id}")
     public Mpa getMPAById(@PathVariable long id) {
-        if (id > 5 || id < 1) {
+        Mpa mpa = mpaStorage.getById(id);
+        if (mpa == null) {
             throw new NotFoundException("MPA with id=" + id + "not found");
         }
         log.debug("Get MPA by id={}", id);
-        return mpaStorage.getById(id);
+        return mpa;
     }
 
     /**

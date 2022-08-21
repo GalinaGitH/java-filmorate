@@ -37,12 +37,6 @@ public class FriendDbStorage implements FriendStorage {
         jdbcTemplate.update(sqlQuery, userId, friendId);
     }
 
-    //этот метод пока не нужен
-    /*public void removeAllFriends(long userId){
-        String sqlQuery = "delete from FRIENDS where USER_ID = ?";
-        jdbcTemplate.update(sqlQuery, userId);
-    }*/
-
     @Override
     public Collection<User> findAllCommonFriends(long userId, long friendId) {
         Collection<User> friendsSet1 = getListOfFriends(userId);
