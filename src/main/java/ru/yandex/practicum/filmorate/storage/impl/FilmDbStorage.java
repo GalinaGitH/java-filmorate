@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.DAO;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -8,13 +8,16 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.SlopeOne;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.Date;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Repository
@@ -81,20 +84,9 @@ public class FilmDbStorage implements FilmStorage {
         return films.get(0);
     }
 
-    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        Film film = Film.builder()
-                .id(resultSet.getLong("FILM_ID"))
-                .name(resultSet.getString("FILM_NAME"))
-                .releaseDate(resultSet.getDate("FILM_RELEASE_DATE").toLocalDate())
-                .description(resultSet.getString("FILM_DESCRIPTION"))
-                .duration(resultSet.getLong("FILM_DURATION"))
-                .mpa(new Mpa(resultSet.getInt("MPA.MPA_ID"), resultSet.getString("MPA.MPA_TYPE")))
-                .build();
-        return film;
-    }
 
     @Override
-    public Collection<Film> findAll() {
+    public List<Film> findAll() {
         String sqlQuery = "select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION , MPA.MPA_ID, MPA.MPA_TYPE " +
                 "from FILMS " +
                 "Join MPA ON MPA.MPA_ID=FILMS.MPA_ID";
@@ -108,24 +100,20 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getRecommended(Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms, long id) {
-        SlopeOne slopeOne = new SlopeOne(idsUsersAndIdsFilms, id);
-        List<Long> idsRecFilms = slopeOne.getRecommendedIdsItemForUser(id);
-        List<Film> filmsFromIds = getFilmsFromIds(idsRecFilms);
-        return filmsFromIds;
-    }
+    public List<Film> getRecommended(long id) {
+        String sqlQuery = " " + "SELECT DISTINCT F.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, " +
+                "FILM_DURATION, M.MPA_ID, MPA_TYPE " +
+                "FROM FILMS F JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+                "JOIN LIKES L on F.FILM_ID = L.FILM_ID " +
+                " WHERE L.FILM_ID NOT IN (SELECT FILM_ID FROM LIKES WHERE LIKES.USER_ID = ?) " +
+                "AND L.FILM_ID IN (SELECT FILM_ID FROM LIKES WHERE USER_ID = " +
+                "(SELECT DISTINCT USER_ID FROM LIKES WHERE FILM_ID IN " +
+                "(SELECT FILM_ID FROM LIKES WHERE USER_ID = ?) " +
+                "AND USER_ID <> ?" +
+                ")" +
+                ")";
 
-    public List<Film> getFilmsFromIds(List <Long> idFilms) {
-        String sql = String.join(",", Collections.nCopies(idFilms.size(), "?"));
-        sql = String.format("select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION ," +
-                " MPA.MPA_ID, MPA.MPA_TYPE " +
-                "from FILMS Join MPA ON MPA.MPA_ID=FILMS.MPA_ID " +
-                "where FILM_ID IN (%s)", sql);
-
-        int[] argTypes = new int[idFilms.size()];
-        Arrays.fill(argTypes, Types.BIGINT);
-        List<Film> films = jdbcTemplate.query(sql, idFilms.toArray(), argTypes, this::mapRowToFilm);
-        return films;
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, id, id, id);
     }
 
     @Override
@@ -153,7 +141,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> search(String query, List<String> by) {
+    public List<Film> search(String query, List<String> by) {
         List<String> params = new ArrayList<>();
         List<String> whereParts = Map.of(
                         "director", "LOWER(DIRECTOR_NAME) LIKE ?",
@@ -178,4 +166,15 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(qbuilder.toString(), this::mapRowToFilm, params.toArray());
     }
 
+    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
+        Film film = Film.builder()
+                .id(resultSet.getLong("FILM_ID"))
+                .name(resultSet.getString("FILM_NAME"))
+                .releaseDate(resultSet.getDate("FILM_RELEASE_DATE").toLocalDate())
+                .description(resultSet.getString("FILM_DESCRIPTION"))
+                .duration(resultSet.getLong("FILM_DURATION"))
+                .mpa(new Mpa(resultSet.getInt("MPA.MPA_ID"), resultSet.getString("MPA.MPA_TYPE")))
+                .build();
+        return film;
+    }
 }

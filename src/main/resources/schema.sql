@@ -1,3 +1,4 @@
+
 DROP TABLE IF EXISTS FILM_GENRES CASCADE ;
 DROP TABLE IF EXISTS FILMS CASCADE ;
 DROP TABLE IF EXISTS FRIENDS CASCADE ;
@@ -11,6 +12,7 @@ DROP TABLE IF EXISTS FEEDS CASCADE ;
 DROP TABLE IF EXISTS REVIEWS CASCADE ;
 DROP TABLE IF EXISTS REVIEW_LIKES CASCADE ;
 
+
 create table IF NOT EXISTS USERS
 (
     USER_ID       BIGINT auto_increment,
@@ -22,13 +24,15 @@ create table IF NOT EXISTS USERS
         primary key (USER_ID)
 );
 
+create unique index if not exists USER_EMAIL_UINDEX on USERS (USER_EMAIL);
+create unique index if not exists USER_LOGIN_UINDEX on USERS (USER_LOGIN);
 
 create table IF NOT EXISTS MPA
 (
     MPA_ID   INTEGER               not null,
     MPA_TYPE CHARACTER VARYING(10) not null,
     constraint MPA_ID
-    primary key (MPA_ID)
+        primary key (MPA_ID)
 );
 
 create unique index IF NOT EXISTS MPA_ID_UINDEX
@@ -47,6 +51,7 @@ create table IF NOT EXISTS FILMS
     constraint MPA_ID_FK
         foreign key (MPA_ID) references MPA
 );
+
 create table IF NOT EXISTS LIKES
 (
     USER_ID BIGINT not null,
@@ -67,7 +72,7 @@ create table IF NOT EXISTS FRIENDS
     constraint FRIENDS_FK
         foreign key (FRIEND_ID) references USERS(USER_ID) ON DELETE CASCADE,
     constraint FRIENDS_FK_TWO
-       foreign key (USER_ID) references USERS(USER_ID) ON DELETE CASCADE
+        foreign key (USER_ID) references USERS(USER_ID) ON DELETE CASCADE
 );
 
 create table IF NOT EXISTS GENRE_NAMES
@@ -75,18 +80,19 @@ create table IF NOT EXISTS GENRE_NAMES
     GENRE_ID   INTEGER auto_increment,
     GENRE_NAME CHARACTER VARYING(20) not null,
     constraint GENRE_NAMES_PK
-    primary key (GENRE_ID)
-    );
+        primary key (GENRE_ID)
+);
 
 create table IF NOT EXISTS FILM_GENRES
 (
     FILM_ID  BIGINT  not null,
     GENRE_ID INTEGER not null,
+    constraint FILM_GENRES_PK
+        primary key (FILM_ID,GENRE_ID),
     constraint GENRES_FK
         foreign key (GENRE_ID) references GENRE_NAMES ON DELETE RESTRICT,
     constraint GENRES_FK_TWO
         foreign key (FILM_ID) references FILMS ON DELETE CASCADE
-
 );
 
 create table IF NOT EXISTS DIRECTORS
@@ -95,21 +101,18 @@ create table IF NOT EXISTS DIRECTORS
     DIRECTOR_NAME   CHARACTER VARYING(100) not null,
     constraint DIRECTORS_PR
         primary key (DIRECTOR_ID)
-
 );
 
 create table IF NOT EXISTS FILM_DIRECTORS
 (
     FILM_ID     BIGINT not null ,
     DIRECTOR_ID INTEGER not null ,
-
-    constraint UNQ_FILM_DIRECTORS
-        UNIQUE (FILM_ID, DIRECTOR_ID),
+    constraint FILM_DIRECTORS_PK
+        primary key (FILM_ID, DIRECTOR_ID),
     constraint FILM_DIRECTORS_FK
         foreign key (DIRECTOR_ID) references DIRECTORS ON DELETE CASCADE,
     constraint FILM_DIRECTORS_FK_TWO
         foreign key (FILM_ID) references FILMS ON DELETE CASCADE
-
 );
 
 create table IF NOT EXISTS REVIEWS

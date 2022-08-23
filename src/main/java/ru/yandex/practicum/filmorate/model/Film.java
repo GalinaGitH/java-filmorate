@@ -19,7 +19,8 @@ import java.util.Set;
 @EqualsAndHashCode(of = "id")
 public class Film {
     @NotNull
-    Mpa mpa; //рейтинг фильма
+    private Mpa mpa; //рейтинг фильма
+
     private long id;
     @NotBlank(message = "название не может быть пустым и содержать пробелы")
     private String name; // название

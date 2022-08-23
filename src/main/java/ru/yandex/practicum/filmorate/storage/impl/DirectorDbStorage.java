@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.DAO;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,13 +36,6 @@ public class DirectorDbStorage implements DirectorStorage {
             return null;
         }
         return directors.get(0);
-    }
-
-    private Director mapRowToDirector(ResultSet resultSet, int rowNum) throws SQLException {
-        return Director.builder()
-                .id(resultSet.getInt("DIRECTOR_ID"))
-                .name(resultSet.getString("DIRECTOR_NAME"))
-                .build();
     }
 
     @Override
@@ -155,6 +148,13 @@ public class DirectorDbStorage implements DirectorStorage {
         }
 
         return sortedFilms;
+    }
+
+    private Director mapRowToDirector(ResultSet resultSet, int rowNum) throws SQLException {
+        return Director.builder()
+                .id(resultSet.getInt("DIRECTOR_ID"))
+                .name(resultSet.getString("DIRECTOR_NAME"))
+                .build();
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {

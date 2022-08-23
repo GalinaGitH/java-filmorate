@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.DAO;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Operation;
-import ru.yandex.practicum.filmorate.storage.FeedDao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,7 +13,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class FeedStorage implements FeedDao {
+public class FeedDbStorage implements ru.yandex.practicum.filmorate.storage.FeedStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override

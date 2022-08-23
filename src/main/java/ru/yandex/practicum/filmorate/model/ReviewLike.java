@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ReviewLike {
 
-    long userId;
-    long reviewId;
-    boolean isUseful;
+    private long userId;
+    private long reviewId;
+    private boolean isUseful;
 }

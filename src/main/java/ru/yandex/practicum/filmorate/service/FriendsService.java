@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Collection;
+import java.util.List;
 
 
 @Service
@@ -48,14 +48,14 @@ public class FriendsService {
     /**
      * вывод списка общих друзей
      */
-    public Collection<User> findAllCommonFriends(long userId, long friendId) {
+    public List<User> findAllCommonFriends(long userId, long friendId) {
         return friendStorage.findAllCommonFriends(userId, friendId);
     }
 
     /**
      * вывод списка друзей пользователя
      */
-    public Collection<User> getListOfFriends(long userId) {
+    public List<User> getListOfFriends(long userId) {
         final User user = userStorage.get(userId);
         if (user == null) {
             throw new NotFoundException("User with id=" + userId + "not found");

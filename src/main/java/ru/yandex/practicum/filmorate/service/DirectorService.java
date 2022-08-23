@@ -14,7 +14,6 @@ import java.util.List;
 public class DirectorService {
     private final DirectorStorage directorStorage;
 
-
     public List<Director> findAllDirectors() {
         return directorStorage.getAll();
     }

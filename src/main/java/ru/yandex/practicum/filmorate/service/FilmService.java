@@ -2,16 +2,17 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.service.recommendation.RecommendationService;
-import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSortBy;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -24,8 +25,6 @@ public class FilmService {
     private final DirectorStorage directorStorage;
 
     private final UserStorage userStorage;
-
-    private final RecommendationService recommendationService;
 
     /**
      * добавление фильма
@@ -81,8 +80,8 @@ public class FilmService {
     /**
      * получение списка всех фильмов
      */
-    public Collection<Film> findAllFilms() {
-        Collection<Film> filmsFromStorage = filmStorage.findAll();
+    public List<Film> findAllFilms() {
+        List<Film> filmsFromStorage = filmStorage.findAll();
         for (Film film : filmsFromStorage) {
             film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
             film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
@@ -105,12 +104,9 @@ public class FilmService {
     public List<Film> getRecommended(long id) {
         final User user = userStorage.get(id);
         if (user == null) {
-            throw new NotFoundException("User  not found");
+            throw new NotFoundException("User not found");
         }
-        Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms = prepareUsersFilmsForRecommendationService();
-        recommendationService.setUsersItemsMap(idsUsersAndIdsFilms);
-        List<Long> recIdsFilms = recommendationService.getRecommendedIdsItemForUser(id);
-        List<Film> recFilms = filmStorage.getFilmsFromIds(recIdsFilms);
+        List<Film> recFilms = filmStorage.getRecommended(id);
         for (Film film : recFilms) {
             film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
             film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
@@ -118,22 +114,8 @@ public class FilmService {
         return recFilms;
     }
 
-
-    private Map<Long, HashMap<Long, Double>> prepareUsersFilmsForRecommendationService() {
-        Map<Long, HashMap<Long, Double>> preparedData = new HashMap<>();
-        List<Long> idsUsers = userStorage.findAllUsers().stream().map(User::getId).collect(Collectors.toList());
-        for (Long idUser : idsUsers) {
-            List<Film> likedFilms = filmStorage.getLikedByUser(idUser);
-            if (likedFilms != null) {
-                Map<Long, Double> idsFilm = likedFilms.stream().collect(Collectors.toMap(Film::getId, val -> 1.0));
-                preparedData.put(idUser, (HashMap<Long, Double>) idsFilm);
-            }
-        }
-        return preparedData;
-    }
-
-    public Collection<Film> searchFilm(String query, List<String> by) {
-        Collection<Film> filmsFromStorage = filmStorage.search(query, by);
+    public List<Film> searchFilm(String query, List<String> by) {
+        List<Film> filmsFromStorage = filmStorage.search(query, by);
         for (Film film : filmsFromStorage) {
             film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
             film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
@@ -142,11 +124,11 @@ public class FilmService {
         return filmsFromStorage;
     }
 
-    public Collection<Film> findCommonFilms(long userId, long friendId) {
-        Collection<Film> UserLikedFilms = filmStorage.getLikedByUserSortedPopular(userId);
-        Collection<Film> FriendLikedFilms = filmStorage.getLikedByUserSortedPopular(friendId);
+    public List<Film> findCommonFilms(long userId, long friendId) {
+        List<Film> UserLikedFilms = filmStorage.getLikedByUserSortedPopular(userId);
+        List<Film> FriendLikedFilms = filmStorage.getLikedByUserSortedPopular(friendId);
         if (UserLikedFilms.size() == 0 || FriendLikedFilms.size() == 0) {
-            Collection<Film> commonFilmsEmpty = new ArrayList<>();
+            List<Film> commonFilmsEmpty = new ArrayList<>();
             return commonFilmsEmpty;
         }
         return (FriendLikedFilms.stream()
@@ -154,12 +136,13 @@ public class FilmService {
                 .collect(Collectors.toList()));
     }
 
-    public Collection<Film> findAllFilmsSortedByYearOrLikes(int directorId, String sortBy) {
-        if ("year".equals(sortBy)) {
+    public List<Film> findAllFilmsSortedByYearOrLikes(int directorId, FilmSortBy sortBy) {
+
+        if (FilmSortBy.year == sortBy) {
             checkDirector(directorId);
             List<Film> sortedFilms = directorStorage.getSortedFilmsByYearOfDirector(directorId);
             return setDirectorsAndGenresToFilms(sortedFilms);
-        } else if ("likes".equals(sortBy)) {
+        } else if (FilmSortBy.likes == sortBy) {
             checkDirector(directorId);
             List<Film> sortedFilms = directorStorage.getSortedFilmsByLikesOfDirector(directorId);
             return setDirectorsAndGenresToFilms(sortedFilms);
