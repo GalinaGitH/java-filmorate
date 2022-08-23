@@ -10,8 +10,8 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 
 @Service
@@ -57,7 +57,7 @@ public class LikesService {
     /**
      * вывод наиболее популярных фильмов по количеству лайков
      */
-    public Collection<Film> findPopularFilmsByGenresAndYear(Integer limit, String year, String genreId) {
+    public List<Film> findPopularFilmsByGenresAndYear(Integer limit, String year, String genreId) {
 
         if (genreId == null && year == null) {
             return setGenresToFilms(likesStorage.findPopularFilm(limit));
@@ -69,11 +69,11 @@ public class LikesService {
             return setGenresToFilms(likesStorage.findPopularFilmsByGenre(limit, Integer.parseInt(genreId)));
         }
 
-        Collection<Film> popularFilms = likesStorage.findPopularFilmsByYearAndGenres(limit, Integer.parseInt(year), Integer.parseInt(genreId));
+        List<Film> popularFilms = likesStorage.findPopularFilmsByYearAndGenres(limit, Integer.parseInt(year), Integer.parseInt(genreId));
         return setGenresToFilms(popularFilms);
     }
 
-    private Collection<Film> setGenresToFilms(Collection<Film> films) {
+    private List<Film> setGenresToFilms(List<Film> films) {
         for (Film film : films) {
             film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film))); //получаем жанры фильма и добавляем к обьекту
         }

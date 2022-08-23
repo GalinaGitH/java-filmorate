@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Collection;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +53,7 @@ public class UserService {
     /**
      * получение списка всех пользователей
      */
-    public Collection<User> findAllUsers() {
+    public List<User> findAllUsers() {
         return userStorage.findAllUsers();
     }
 

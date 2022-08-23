@@ -1,29 +1,23 @@
 package ru.yandex.practicum.filmorate.controllers;
 
-import lombok.NoArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import javax.validation.constraints.Positive;
+import java.util.List;
 
 @RestController
 @Validated
-@NoArgsConstructor
+@RequiredArgsConstructor
+@Slf4j
 public class ReviewController {
-    private static final Logger log = LoggerFactory.getLogger(ReviewController.class);
 
-    private ReviewService reviewService;
-
-    @Autowired
-    public ReviewController(ReviewService reviewService) {
-        this.reviewService = reviewService;
-    }
+    private final ReviewService reviewService;
 
     @PostMapping(value = "/reviews")
     public Review create(@Valid @RequestBody Review review) {
@@ -39,43 +33,45 @@ public class ReviewController {
     }
 
     @DeleteMapping("/reviews/{id}")
-    public void deleteReviewById(@PathVariable("id") long reviewId) {
+    public void deleteById(@PathVariable("id") long reviewId) {
         reviewService.deleteReviewById(reviewId);
         log.debug("Отзыв с id = {} удален из списка", reviewId);
     }
 
     @GetMapping("/reviews/{id}")
-    public Review getReviewById(@PathVariable("id") long reviewId) {
+    public Review getById(@PathVariable("id") long reviewId) {
         log.debug("Получение отзыва с reviewId = {}", reviewId);
         return reviewService.get(reviewId);
     }
 
     @GetMapping("/reviews")
-    public Collection<Review> getAllReviewByFilmId(@RequestParam(required = false) Long filmId, @RequestParam(value = "count", defaultValue = "10", required = false) int count) {
+    public List<Review> getAllByFilmId(@RequestParam(required = false) Long filmId,
+                                       @RequestParam(value = "count", defaultValue = "10", required = false)
+                                       @Positive int count) {
         log.debug("Список отзывов фильма с filmid = {}", filmId);
         return reviewService.getAllReviewsByFilmId(filmId, count);
     }
 
     @PutMapping(value = "/reviews/{id}/like/{userId}")
-    public void likeReview(@PathVariable("id") long reviewId, @PathVariable long userId) {
+    public void addLike(@PathVariable("id") long reviewId, @PathVariable long userId) {
         reviewService.likeReview(userId, reviewId);
         log.debug("Пользователь с id = {} поставил like отзыву с reviewId = {}", userId, reviewId);
     }
 
     @PutMapping(value = "/reviews/{id}/dislike/{userId}")
-    public void disLikeReview(@PathVariable("id") long reviewId, @PathVariable long userId) {
+    public void addDisLike(@PathVariable("id") long reviewId, @PathVariable long userId) {
         reviewService.disLikeReview(userId, reviewId);
         log.debug("Пользователь с id = {} поставил dislike отзыву с reviewId = {}", userId, reviewId);
     }
 
     @DeleteMapping(value = "/reviews/{id}/like/{userId}")
-    public void deleteLikeReview(@PathVariable("id") long reviewId, @PathVariable long userId) {
+    public void deleteLike(@PathVariable("id") long reviewId, @PathVariable long userId) {
         reviewService.deleteLikeOrDisLike(userId, reviewId);
         log.debug("Пользователь с id = {} удалил свой like c отзыва reviewId = {}", userId, reviewId);
     }
 
     @DeleteMapping(value = "/reviews/{id}/dislike/{userId}")
-    public void deleteDisLikeReview(@PathVariable("id") long reviewId, @PathVariable long userId) {
+    public void deleteDisLike(@PathVariable("id") long reviewId, @PathVariable long userId) {
         reviewService.deleteLikeOrDisLike(userId, reviewId);
         log.debug("Пользователь с id = {} удалил свой dislike c отзыва reviewId = {}", userId, reviewId);
     }

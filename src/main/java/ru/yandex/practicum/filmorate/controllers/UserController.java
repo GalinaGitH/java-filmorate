@@ -1,45 +1,33 @@
 package ru.yandex.practicum.filmorate.controllers;
 
-import lombok.NoArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.*;
+import ru.yandex.practicum.filmorate.service.FeedService;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.FriendsService;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.Collection;
 import java.util.List;
 
 @Validated
 @RestController
-@NoArgsConstructor
+@RequiredArgsConstructor
+@Slf4j
 public class UserController {
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
-    private UserService userService;
-    private FriendsService friendsService;
-    private FeedService feedService;
 
-    private LikesService likesService;
-
-    private FilmService filmService;
-
-    @Autowired
-    public UserController(UserService userService, FriendsService friendsService, LikesService likesService,
-                          FilmService filmService, FeedService feedService) {
-        this.userService = userService;
-        this.friendsService = friendsService;
-        this.likesService = likesService;
-        this.filmService = filmService;
-        this.feedService = feedService;
-    }
+    private final UserService userService;
+    private final FriendsService friendsService;
+    private final FeedService feedService;
+    private final FilmService filmService;
 
     @GetMapping("/users")
-    public Collection<User> findAllUsers() {
+    public List<User> findAllUsers() {
         log.debug("Текущее количество пользователей: {}", userService.findAllUsers().size());
         return userService.findAllUsers();
     }
@@ -64,7 +52,7 @@ public class UserController {
     }
 
     @PutMapping(value = "/users")
-    public User update(@Valid @RequestBody User user) {
+    public User updateUser(@Valid @RequestBody User user) {
         userService.updateUser(user);
         log.debug("Данные пользователя обновлены");
         return user;
@@ -83,13 +71,13 @@ public class UserController {
     }
 
     @GetMapping("/users/{userId}/friends/common/{otherId}")
-    public Collection<User> findCommonFriends(@PathVariable long userId, @PathVariable long otherId) {
+    public List<User> findCommonFriends(@PathVariable long userId, @PathVariable long otherId) {
         log.debug("Количество общих друзей: {}", friendsService.findAllCommonFriends(userId, otherId).size());
         return friendsService.findAllCommonFriends(userId, otherId);
     }
 
     @GetMapping("/users/{userId}/friends")
-    public Collection<User> findAllFriends(@PathVariable long userId) {
+    public List<User> findAllFriends(@PathVariable long userId) {
         log.debug("Количество друзей: {}", friendsService.getListOfFriends(userId).size());
         return friendsService.getListOfFriends(userId);
     }
@@ -102,7 +90,7 @@ public class UserController {
 
 
     @GetMapping("/users/{id}/recommendations")
-    public Collection<Film> getRecommendations(@PathVariable long id) {
+    public List<Film> getRecommendedFilms(@PathVariable long id) {
         List<Film> recFilms = filmService.getRecommended(id);
         log.debug("Количество рекомендованных фильмов: {}", recFilms.size());
         return recFilms;

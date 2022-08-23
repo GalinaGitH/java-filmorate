@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.DAO;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -79,18 +78,8 @@ public class UserDbStorage implements UserStorage {
         return users.get(0);
     }
 
-    private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
-        return User.builder()
-                .id(resultSet.getLong("USER_ID"))
-                .name(resultSet.getString("USER_NAME"))
-                .email(resultSet.getString("USER_EMAIL"))
-                .login(resultSet.getString("USER_LOGIN"))
-                .birthday(resultSet.getDate("USER_BIRTHDAY").toLocalDate())
-                .build();
-    }
-
     @Override
-    public Collection<User> findAllUsers() {
+    public List<User> findAllUsers() {
         String sqlQuery = "select USER_ID,USER_NAME,USER_EMAIL,USER_LOGIN,USER_BIRTHDAY " +
                 "from USERS";
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
@@ -100,6 +89,16 @@ public class UserDbStorage implements UserStorage {
     public void removeUserById(long userId) {
         String sqlQuery = "delete from USERS where USER_ID = ?";
         jdbcTemplate.update(sqlQuery, userId);
+    }
+
+    private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
+        return User.builder()
+                .id(resultSet.getLong("USER_ID"))
+                .name(resultSet.getString("USER_NAME"))
+                .email(resultSet.getString("USER_EMAIL"))
+                .login(resultSet.getString("USER_LOGIN"))
+                .birthday(resultSet.getDate("USER_BIRTHDAY").toLocalDate())
+                .build();
     }
 
 }

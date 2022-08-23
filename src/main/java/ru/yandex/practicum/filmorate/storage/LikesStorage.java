@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Like;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface LikesStorage {
@@ -14,11 +13,11 @@ public interface LikesStorage {
 
     void removeLikes(long filmId, long userId);
 
-    Collection<Film> findPopularFilm(Integer size);
+    List<Film> findPopularFilm(Integer size);
 
-    Collection<Film> findPopularFilmsByYearAndGenres(Integer limit, int genreId, int year);
+    List<Film> findPopularFilmsByYearAndGenres(Integer limit, int genreId, int year);
 
-    Collection<Film> findPopularFilmsByYear(Integer limit, int year);
+    List<Film> findPopularFilmsByYear(Integer limit, int year);
 
-    Collection<Film> findPopularFilmsByGenre(Integer limit, int genreId);
+    List<Film> findPopularFilmsByGenre(Integer limit, int genreId);
 }

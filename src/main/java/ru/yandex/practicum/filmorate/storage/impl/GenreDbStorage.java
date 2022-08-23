@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.DAO;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,12 +32,6 @@ public class GenreDbStorage implements GenreStorage {
         return genres.get(0);
     }
 
-    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
-        return Genre.builder()
-                .id(resultSet.getInt("GENRE_ID"))
-                .name(resultSet.getString("GENRE_NAME"))
-                .build();
-    }
 
     @Override
     public List<Genre> getAll() {
@@ -80,4 +74,12 @@ public class GenreDbStorage implements GenreStorage {
         final List<Genre> genres = jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId);
         return genres;
     }
+
+    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
+        return Genre.builder()
+                .id(resultSet.getInt("GENRE_ID"))
+                .name(resultSet.getString("GENRE_NAME"))
+                .build();
+    }
+
 }

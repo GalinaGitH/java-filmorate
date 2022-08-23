@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.DAO;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -14,7 +14,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,7 +77,7 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public Collection<Review> getReviewByFilmId(long filmId, int count) {
+    public List<Review> getReviewByFilmId(long filmId, int count) {
         final String sqlQuery = "select REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT " +
                 "from REVIEWS " +
                 "where FILM_ID = ?" +
@@ -91,7 +90,7 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public Collection<Review> getAllReview(int count) {
+    public List<Review> getAllReview(int count) {
         final String sqlQuery = "select REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT " +
                 "from REVIEWS " +
                 "GROUP BY REVIEW_ID ";

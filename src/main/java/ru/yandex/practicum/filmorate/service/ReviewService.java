@@ -13,7 +13,7 @@ import ru.yandex.practicum.filmorate.storage.ReviewLikeStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Collection;
+import java.util.List;
 
 
 @Service
@@ -76,7 +76,7 @@ public class ReviewService {
     /**
      * Получение всех отзывов
      */
-    public Collection<Review> getAllReview(int count) {
+    public List<Review> getAllReview(int count) {
         return reviewStorage.getAllReview(count);
     }
 
@@ -116,7 +116,7 @@ public class ReviewService {
      * Получение всех отзывов по идентификатору фильма,
      * Если кол-во не указано то 10.
      */
-    public Collection<Review> getAllReviewsByFilmId(Long filmId, int count) {
+    public List<Review> getAllReviewsByFilmId(Long filmId, int count) {
         if (filmId == null) {
             return reviewStorage.getAllReview(count);
 
