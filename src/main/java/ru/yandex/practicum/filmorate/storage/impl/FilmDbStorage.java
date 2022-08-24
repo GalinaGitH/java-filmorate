@@ -7,17 +7,14 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
+import java.sql.*;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -46,6 +43,8 @@ public class FilmDbStorage implements FilmStorage {
             return stmt;
         }, keyHolder);
         film.setId(keyHolder.getKey().longValue());
+
+        saveGenres(film);
         return film;
     }
 
@@ -61,6 +60,8 @@ public class FilmDbStorage implements FilmStorage {
                 , film.getDuration()
                 , film.getMpa().getId()
                 , film.getId());
+
+        saveGenres(film);
         return film;
     }
 
@@ -78,6 +79,7 @@ public class FilmDbStorage implements FilmStorage {
                 "Join MPA ON MPA.MPA_ID=FILMS.MPA_ID " +
                 "where FILM_ID = ?";
         final List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, filmId);
+        loadGenres(films);
         if (films.size() != 1) {
             return null;
         }
@@ -90,30 +92,15 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION , MPA.MPA_ID, MPA.MPA_TYPE " +
                 "from FILMS " +
                 "Join MPA ON MPA.MPA_ID=FILMS.MPA_ID";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
+        List<Film> filmsDB = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
+        loadGenres(filmsDB);
+        return filmsDB;
     }
 
     @Override
     public void removeFilmById(long filmId) {
         String sqlQuery = "delete from FILMS where FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, filmId);
-    }
-
-    @Override
-    public List<Film> getRecommended(long id) {
-        String sqlQuery = " " + "SELECT DISTINCT F.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, " +
-                "FILM_DURATION, M.MPA_ID, MPA_TYPE " +
-                "FROM FILMS F JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
-                "JOIN LIKES L on F.FILM_ID = L.FILM_ID " +
-                " WHERE L.FILM_ID NOT IN (SELECT FILM_ID FROM LIKES WHERE LIKES.USER_ID = ?) " +
-                "AND L.FILM_ID IN (SELECT FILM_ID FROM LIKES WHERE USER_ID = " +
-                "(SELECT DISTINCT USER_ID FROM LIKES WHERE FILM_ID IN " +
-                "(SELECT FILM_ID FROM LIKES WHERE USER_ID = ?) " +
-                "AND USER_ID <> ?" +
-                ")" +
-                ")";
-
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, id, id, id);
     }
 
     @Override
@@ -124,6 +111,7 @@ public class FilmDbStorage implements FilmStorage {
                 "JOIN MPA  ON MPA.MPA_ID = FILMS.MPA_ID" +
                 " WHERE LIKES.USER_ID = ?;";
         List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId);
+        loadGenres(films);
         return films;
     }
 
@@ -137,6 +125,21 @@ public class FilmDbStorage implements FilmStorage {
                 " GROUP BY FILMS.FILM_ID " +
                 " ORDER BY CNT DESC;";
         List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId);
+        loadGenres(films);
+        return films;
+    }
+
+    @Override
+    public List<Film> getFilmsFromIds(List <Long> idFilms) {
+        String sql = String.join(",", Collections.nCopies(idFilms.size(), "?"));
+        sql = String.format("select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION ," +
+                " MPA.MPA_ID, MPA.MPA_TYPE " +
+                "from FILMS Join MPA ON MPA.MPA_ID=FILMS.MPA_ID " +
+                "where FILM_ID IN (%s)", sql);
+        int[] argTypes = new int[idFilms.size()];
+        Arrays.fill(argTypes, Types.BIGINT);
+        List<Film> films = jdbcTemplate.query(sql, idFilms.toArray(), argTypes, this::mapRowToFilm);
+        loadGenres(films);
         return films;
     }
 
@@ -152,18 +155,18 @@ public class FilmDbStorage implements FilmStorage {
                 .map(Map.Entry::getValue)
                 .peek(entry -> params.add("%" + query.toLowerCase() + "%"))
                 .collect(Collectors.toList());
-        StringBuilder qbuilder = new StringBuilder();
-        qbuilder
-                .append(" SELECT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILM_DURATION, MPA.MPA_ID, MPA.MPA_TYPE, DIRECTOR_NAME")
-                .append(" FROM")
-                .append(" FILMS LEFT JOIN MPA ON MPA.MPA_ID=FILMS.MPA_ID LEFT JOIN FILM_DIRECTORS")
-                .append(" ON FILMS.FILM_ID = FILM_DIRECTORS.FILM_ID")
-                .append(" LEFT JOIN DIRECTORS ON DIRECTORS.DIRECTOR_ID = FILM_DIRECTORS.DIRECTOR_ID")
-                .append(" WHERE ")
-                .append(String.join(" OR ", whereParts))
-                .append(" ORDER BY FILMS.FILM_ID DESC")
-                .append(";");
-        return jdbcTemplate.query(qbuilder.toString(), this::mapRowToFilm, params.toArray());
+        String qbuilder = " SELECT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILM_DURATION, MPA.MPA_ID, MPA.MPA_TYPE, DIRECTOR_NAME" +
+                " FROM" +
+                " FILMS LEFT JOIN MPA ON MPA.MPA_ID=FILMS.MPA_ID LEFT JOIN FILM_DIRECTORS" +
+                " ON FILMS.FILM_ID = FILM_DIRECTORS.FILM_ID" +
+                " LEFT JOIN DIRECTORS ON DIRECTORS.DIRECTOR_ID = FILM_DIRECTORS.DIRECTOR_ID" +
+                " WHERE " +
+                String.join(" OR ", whereParts) +
+                " ORDER BY FILMS.FILM_ID DESC" +
+                ";";
+        List<Film> films = jdbcTemplate.query(qbuilder, this::mapRowToFilm, params.toArray());
+        loadGenres(films);
+        return films;
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
@@ -176,5 +179,45 @@ public class FilmDbStorage implements FilmStorage {
                 .mpa(new Mpa(resultSet.getInt("MPA.MPA_ID"), resultSet.getString("MPA.MPA_TYPE")))
                 .build();
         return film;
+    }
+
+    private void saveGenres(Film film) {
+        long id = film.getId();
+        String sqlDelete = "delete from FILM_GENRES where FILM_ID = ?";
+        jdbcTemplate.update(sqlDelete, id);
+        if (film.getGenres() == null || film.getGenres().isEmpty()) {
+            return;
+        }
+        for (Genre genre : film.getGenres()) {
+            String sqlQuery = "INSERT INTO FILM_GENRES (FILM_ID, GENRE_ID) values (?,?) ";
+            jdbcTemplate.update(sqlQuery
+                    , id
+                    , genre.getId());
+        }
+    }
+
+    private void loadGenres(List<Film> films) {
+        Map<Long, Film> idToFilm = films
+                .stream()
+                .collect(Collectors
+                        .toMap(Film::getId, film -> {
+                            film.setGenres(new HashSet<Genre>());
+                            return film;
+                        }, (a, b) -> b));
+        List<Long> ids = films.stream().map(Film::getId).collect(Collectors.toList());
+        String sql = String.join(",", Collections.nCopies(ids.size(), "?"));
+        sql = String.format("SELECT FG.GENRE_ID, FG.FILM_ID, GN.GENRE_NAME " +
+                "FROM FILM_GENRES AS FG JOIN GENRE_NAMES AS GN ON GN.GENRE_ID = FG.GENRE_ID" +
+                " WHERE FG.FILM_ID IN (%s)", sql);
+
+        int[] argTypes = new int[ids.size()];
+        Arrays.fill(argTypes, Types.BIGINT);
+
+        jdbcTemplate.query(sql, ids.toArray(), argTypes,
+                (rs, rowNum) ->
+                        idToFilm.get(rs.getLong("FILM_GENRES.FILM_ID")).getGenres()
+                                .add(new Genre(rs.getInt("FILM_GENRES.GENRE_ID"),
+                                        rs.getString("GENRE_NAMES.GENRE_NAME")))
+        );
     }
 }

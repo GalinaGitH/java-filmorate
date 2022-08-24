@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
@@ -28,17 +29,19 @@ public class LikesService {
     /**
      * добавление лайка
      */
-    public void addLikes(long filmId, long userId) {
+    public void addOrUpdateLikes(long filmId, long userId, Integer score) {
         final Film film = filmStorage.get(filmId);
         if (film == null) {
             throw new NotFoundException("Film  not found");
         }
-
         if (likesStorage.getLikes(filmId, userId).size() == 0) {
             feedService.addLikeFilmInFeed(filmId, userId);
-            likesStorage.addLikes(filmId, userId);
+            likesStorage.addLikes(filmId, userId,score);
         }
-
+        else {
+            feedService.addLikeFilmInFeed(filmId, userId);
+            likesStorage.updateLikes(filmId, userId,score);
+        }
     }
 
     /**

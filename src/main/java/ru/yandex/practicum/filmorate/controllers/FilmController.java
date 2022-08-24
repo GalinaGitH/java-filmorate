@@ -49,11 +49,11 @@ public class FilmController {
     }
 
     @PutMapping("/films/{filmId}/like/{userId}")
-    public void addLikes(@PathVariable long filmId, @PathVariable long userId) {
+    public void addLikes(@PathVariable long filmId, @PathVariable long userId,@RequestParam(defaultValue = "10", required = false) @Positive Integer score) {
         log.debug("Добавлен еще один лайк фильму: {} от пользователя c id = {}",
                 filmService.get(filmId).getName(),
                 userId);
-        likesService.addLikes(filmId, userId);
+        likesService.addOrUpdateLikes(filmId, userId, score);
     }
 
     @DeleteMapping("/films/{filmId}/like/{userId}")

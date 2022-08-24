@@ -8,11 +8,10 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmSortBy;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.recommendation.RecommendationService;
 import ru.yandex.practicum.filmorate.storage.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -25,6 +24,7 @@ public class FilmService {
     private final DirectorStorage directorStorage;
 
     private final UserStorage userStorage;
+    private final RecommendationService recommendationService;
 
     /**
      * добавление фильма
@@ -33,7 +33,6 @@ public class FilmService {
         final Film filmFromStorage = filmStorage.get(film.getId());
         if (filmFromStorage == null) {
             filmStorage.create(film);
-            genreStorage.setFilmGenre(film);
             directorStorage.setFilmDirector(film);
         } else throw new AlreadyExistException(String.format(
                 "Фильм с таким id %s уже зарегистрирован.", film.getId()));
@@ -49,7 +48,6 @@ public class FilmService {
             throw new NotFoundException("Film with id=" + film.getId() + "not found");
         }
         filmStorage.update(film);
-        genreStorage.setFilmGenre(film);
         directorStorage.setFilmDirector(film);
         if (film.getDirectors().isEmpty()) {
             film.setDirectors(null);
@@ -72,7 +70,6 @@ public class FilmService {
         if (film == null) {
             throw new NotFoundException("Film with id=" + filmId + "not found");
         }
-        film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
         film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
         return film;
     }
@@ -83,7 +80,6 @@ public class FilmService {
     public List<Film> findAllFilms() {
         List<Film> filmsFromStorage = filmStorage.findAll();
         for (Film film : filmsFromStorage) {
-            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
             film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
         }
 
@@ -104,20 +100,34 @@ public class FilmService {
     public List<Film> getRecommended(long id) {
         final User user = userStorage.get(id);
         if (user == null) {
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("User  not found");
         }
-        List<Film> recFilms = filmStorage.getRecommended(id);
+        Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms = prepareUsersFilmsForRecommendationService();
+        recommendationService.setUsersItemsMap(idsUsersAndIdsFilms);
+        List<Long> recIdsFilms = recommendationService.getRecommendedIdsItemForUser(id);
+        List<Film> recFilms = filmStorage.getFilmsFromIds(recIdsFilms);
         for (Film film : recFilms) {
-            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
             film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
         }
         return recFilms;
     }
 
+    private Map<Long, HashMap<Long, Double>> prepareUsersFilmsForRecommendationService() {
+        Map<Long, HashMap<Long, Double>> preparedData = new HashMap<>();
+        List<Long> idsUsers = userStorage.findAllUsers().stream().map(User::getId).collect(Collectors.toList());
+        for (Long idUser : idsUsers) {
+            List<Film> likedFilms = filmStorage.getLikedByUser(idUser);
+            if (likedFilms != null) {
+                Map<Long, Double> idsFilm = likedFilms.stream().collect(Collectors.toMap(Film::getId, val-> 1.0));
+                preparedData.put(idUser, (HashMap<Long, Double>) idsFilm);
+            }
+        }
+        return preparedData;
+    }
+
     public List<Film> searchFilm(String query, List<String> by) {
         List<Film> filmsFromStorage = filmStorage.search(query, by);
         for (Film film : filmsFromStorage) {
-            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
             film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
         }
 
@@ -137,7 +147,6 @@ public class FilmService {
     }
 
     public List<Film> findAllFilmsSortedByYearOrLikes(int directorId, FilmSortBy sortBy) {
-
         if (FilmSortBy.year == sortBy) {
             checkDirector(directorId);
             List<Film> sortedFilms = directorStorage.getSortedFilmsByYearOfDirector(directorId);
@@ -160,7 +169,6 @@ public class FilmService {
 
     private List<Film> setDirectorsAndGenresToFilms(List<Film> filmsFromStorage) {
         for (Film film : filmsFromStorage) {
-            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film)));
             film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
         }
         return filmsFromStorage;
