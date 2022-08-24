@@ -1,6 +1,6 @@
 # java-filmorate
 Template repository for Filmorate project.
-<img width="814" alt="Filmorate database" src="https://user-images.githubusercontent.com/100468392/183958614-f7951119-121e-47d9-a3b3-873a2480b4e7.png">
+<img width="814" alt="Filmorate database" src="img.png">
 
 примеры SQL запросов к БД:
 

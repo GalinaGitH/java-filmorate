@@ -1,39 +1,29 @@
 package ru.yandex.practicum.filmorate.controllers;
 
-import lombok.NoArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.FilmSortBy;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.LikesService;
 
 import javax.validation.Valid;
-import javax.validation.ValidationException;
-import java.util.*;
+import javax.validation.constraints.Positive;
+import java.util.List;
 
 @RestController
 @Validated
-@NoArgsConstructor
+@RequiredArgsConstructor
+@Slf4j
 public class FilmController {
-    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
 
-    private FilmService filmService;
-    private LikesService likesService;
-
-    @Autowired
-    public FilmController(FilmService filmService, LikesService likesService) {
-        this.filmService = filmService;
-        this.likesService = likesService;
-    }
+    private final FilmService filmService;
+    private final LikesService likesService;
 
     @GetMapping("/films")
-    public Collection<Film> findAll() {
+    public List<Film> findAllFilms() {
         log.debug("Текущее количество фильмов: {}", filmService.findAllFilms().size());
         return filmService.findAllFilms();
     }
@@ -45,14 +35,14 @@ public class FilmController {
     }
 
     @PostMapping(value = "/films")
-    public Film create(@Valid @RequestBody Film film) {
+    public Film createFilm(@Valid @RequestBody Film film) {
         log.debug("Количество добавленных фильмов: {}", 1);
         filmService.saveFilm(film);
         return film;
     }
 
     @PutMapping(value = "/films")
-    public Film update(@Valid @RequestBody Film film) {
+    public Film updateFilm(@Valid @RequestBody Film film) {
         log.debug("Данные фильма обновлены");
         filmService.updateFilm(film);
         return film;
@@ -72,10 +62,35 @@ public class FilmController {
         likesService.removeLikes(filmId, userId);
     }
 
+    @GetMapping("/films/search")
+    public List<Film> searchFilm(@RequestParam String query, @RequestParam List<String> by) {
+        log.debug("Поиск по фильмам {}, {}", query, by);
+        return filmService.searchFilm(query, by);
+    }
+
+    @GetMapping("/films/director/{directorId}")
+    public List<Film> sortByFilm(@PathVariable int directorId, @RequestParam FilmSortBy sortBy) {
+        log.debug("Сортируем список фильмов конкретного режиссера с id={} по годам", directorId);
+        return filmService.findAllFilmsSortedByYearOrLikes(directorId, sortBy);
+    }
+
+    @DeleteMapping("/films/{filmId}")
+    public void deleteFilmById(@PathVariable long filmId) {
+        filmService.deleteFilmById(filmId);
+        log.debug("Фильм с id = {} удален из списка", filmId);
+    }
+
+    @GetMapping("/films/common")
+    public List<Film> findCommonFilms(@RequestParam String userId, @RequestParam String friendId) {
+        log.debug("Список общих фильмов пользователя с Id={} и пользователя с id={} по популярности", userId, friendId);
+        return filmService.findCommonFilms(Long.parseLong(userId), Long.parseLong(friendId));
+    }
+
     @GetMapping("/films/popular")
-    public Collection<Film> findPopularFilm(@RequestParam(defaultValue = "10", required = false) Integer count) {
-        log.debug("Список из {} самых популярных фильмов", count);
-        return likesService.findPopularFilm(count);
+    public List<Film> findPopularFilmsByGenresAndYear(@RequestParam(defaultValue = "10", required = false) @Positive Integer count, @RequestParam(required = false) String year, @RequestParam(required = false) String genreId) {
+        log.debug("Список из {} самых популярных фильмов по жанру с Id={} и году {}", count, year, genreId);
+
+        return likesService.findPopularFilmsByGenresAndYear(count, year, genreId);
     }
 
 }

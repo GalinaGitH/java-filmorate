@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.DAO;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.storage.FriendStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -37,22 +36,16 @@ public class FriendDbStorage implements FriendStorage {
         jdbcTemplate.update(sqlQuery, userId, friendId);
     }
 
-    //этот метод пока не нужен
-    /*public void removeAllFriends(long userId){
-        String sqlQuery = "delete from FRIENDS where USER_ID = ?";
-        jdbcTemplate.update(sqlQuery, userId);
-    }*/
-
     @Override
-    public Collection<User> findAllCommonFriends(long userId, long friendId) {
-        Collection<User> friendsSet1 = getListOfFriends(userId);
-        Collection<User> friendsSet2 = getListOfFriends(friendId);
+    public List<User> findAllCommonFriends(long userId, long friendId) {
+        List<User> friendsSet1 = getListOfFriends(userId);
+        List<User> friendsSet2 = getListOfFriends(friendId);
         friendsSet1.retainAll(friendsSet2);
         return friendsSet1;
     }
 
     @Override
-    public Collection<User> getListOfFriends(long userId) {
+    public List<User> getListOfFriends(long userId) {
         String sqlQuery = "select U2.USER_ID, U2.USER_NAME, U2.USER_EMAIL, U2.USER_LOGIN, U2.USER_BIRTHDAY " +
                 "from USERS U " +
                 "Join FRIENDS F ON U.USER_ID=F.USER_ID " +

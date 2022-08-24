@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.DAO;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -13,7 +14,6 @@ import java.util.List;
 @Repository
 public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
-
 
     @Autowired
     public GenreDbStorage(JdbcTemplate jdbcTemplate) {
@@ -32,12 +32,6 @@ public class GenreDbStorage implements GenreStorage {
         return genres.get(0);
     }
 
-    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
-        return Genre.builder()
-                .id(resultSet.getInt("GENRE_ID"))
-                .name(resultSet.getString("GENRE_NAME"))
-                .build();
-    }
 
     @Override
     public List<Genre> getAll() {
@@ -80,4 +74,12 @@ public class GenreDbStorage implements GenreStorage {
         final List<Genre> genres = jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId);
         return genres;
     }
+
+    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
+        return Genre.builder()
+                .id(resultSet.getInt("GENRE_ID"))
+                .name(resultSet.getString("GENRE_NAME"))
+                .build();
+    }
+
 }

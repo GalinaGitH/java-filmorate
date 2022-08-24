@@ -1,15 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +53,7 @@ public class UserService {
     /**
      * получение списка всех пользователей
      */
-    public Collection<User> findAllUsers() {
+    public List<User> findAllUsers() {
         return userStorage.findAllUsers();
     }
 
@@ -69,4 +67,16 @@ public class UserService {
         }
         return user;
     }
+
+    /**
+     * удаление пользователя по id
+     */
+    public void deleteUserById(long userId) {
+        final User user = userStorage.get(userId);
+        if (user == null) {
+            throw new NotFoundException("User with id=" + userId + "not found");
+        }
+        userStorage.removeUserById(userId);
+    }
+
 }

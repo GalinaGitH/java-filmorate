@@ -1,51 +1,41 @@
 package ru.yandex.practicum.filmorate.controllers;
 
-import lombok.NoArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.MpaStorage;
+import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.util.List;
 
 @RestController
 @Validated
-@NoArgsConstructor
+@RequiredArgsConstructor
+@Slf4j
 public class MpaController {
-    private static final Logger log = LoggerFactory.getLogger(MpaController.class);
 
-    private MpaStorage mpaStorage;
-
-    @Autowired
-    public MpaController(MpaStorage mpaStorage) {
-        this.mpaStorage = mpaStorage;
-    }
+    private final MpaService mpaService;
 
     /**
      * получение рейтинга(MPA) по идентификатору
      */
     @GetMapping("/mpa/{id}")
-    public Mpa getMPAById(@PathVariable long id) {
-        if (id > 5 || id < 1) {
-            throw new NotFoundException("MPA with id=" + id + "not found");
-        }
+    public Mpa getById(@PathVariable long id) {
+        Mpa mpa = mpaService.getById(id);
         log.debug("Get MPA by id={}", id);
-        return mpaStorage.getById(id);
+        return mpa;
     }
 
     /**
      * получение списка всех рейтингов(MPA)
      */
     @GetMapping("/mpa")
-    public List<Mpa> getAllMPA() {
-        log.debug("Общее количество рейтингов MPA : {}", mpaStorage.getAll().size());
-        return mpaStorage.getAll();
+    public List<Mpa> getAll() {
+        log.debug("Общее количество рейтингов MPA : {}", mpaService.getAll().size());
+        return mpaService.getAll();
     }
 
 }

@@ -1,3 +1,4 @@
+/*
 package ru.yandex.practicum.filmorate;
 
 import lombok.RequiredArgsConstructor;
@@ -8,10 +9,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.jdbc.JdbcTestUtils;
-import ru.yandex.practicum.filmorate.DAO.FilmDbStorage;
-import ru.yandex.practicum.filmorate.DAO.FriendDbStorage;
-import ru.yandex.practicum.filmorate.DAO.MpaDbStorage;
-import ru.yandex.practicum.filmorate.DAO.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.impl.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.impl.FriendDbStorage;
+import ru.yandex.practicum.filmorate.storage.impl.MpaDbStorage;
+import ru.yandex.practicum.filmorate.storage.impl.UserDbStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -28,3 +29,5 @@ class FilmorateApplicationTests {
     void contextLoads() {
     }
 }
+
+ */
