@@ -9,6 +9,8 @@ public interface LikesStorage {
 
     List<Like> getLikes(long filmId, long userId);
 
+    List<Like> getAllLikes();
+
     void addLikes(long filmId, long userId, Integer score);
 
     void removeLikes(long filmId, long userId);

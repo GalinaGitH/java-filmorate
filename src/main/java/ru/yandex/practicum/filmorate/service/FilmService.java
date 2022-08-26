@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmSortBy;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.recommendation.RecommendationService;
 import ru.yandex.practicum.filmorate.storage.*;
 
@@ -19,12 +16,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final GenreStorage genreStorage;
-    private final MpaStorage mpaStorage;
     private final DirectorStorage directorStorage;
-
     private final UserStorage userStorage;
     private final RecommendationService recommendationService;
+    private final LikesStorage likesStorage;
 
     /**
      * добавление фильма
@@ -113,14 +108,21 @@ public class FilmService {
     }
 
     private Map<Long, HashMap<Long, Double>> prepareUsersFilmsForRecommendationService() {
+        List<Like> likesBD = likesStorage.getAllLikes();
+
         Map<Long, HashMap<Long, Double>> preparedData = new HashMap<>();
-        List<Long> idsUsers = userStorage.findAllUsers().stream().map(User::getId).collect(Collectors.toList());
+        List<Long> idsUsers = likesBD
+                .stream()
+                .map(Like::getUser_id)
+                .collect(Collectors.toList());
+
         for (Long idUser : idsUsers) {
-            List<Film> likedFilms = filmStorage.getLikedByUser(idUser);
-            if (likedFilms != null) {
-                Map<Long, Double> idsFilm = likedFilms.stream().collect(Collectors.toMap(Film::getId, val-> 1.0));
-                preparedData.put(idUser, (HashMap<Long, Double>) idsFilm);
-            }
+            Map<Long, Double> filmsScore = likesBD
+                    .stream()
+                    .filter(val -> val.getUser_id().equals(idUser))
+                    .collect(Collectors.toMap(Like::getFilm_id, val -> val.getScore() * 1.0));
+
+            preparedData.put(idUser, (HashMap<Long, Double>) filmsScore);
         }
         return preparedData;
     }

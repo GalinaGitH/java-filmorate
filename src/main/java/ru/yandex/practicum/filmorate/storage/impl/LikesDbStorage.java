@@ -26,12 +26,20 @@ public class LikesDbStorage implements LikesStorage {
 
     @Override
     public List<Like> getLikes(long filmId, long userId) {
-        String sqlQuery = "SELECT LIKES.USER_ID, LIKES.FILM_ID " +
+        String sqlQuery = "SELECT LIKES.USER_ID, LIKES.FILM_ID, LIKES.SCORE " +
                 "FROM LIKES " +
                 "WHERE LIKES.USER_ID = ? AND LIKES.FILM_ID = ? " +
                 "LIMIT 1";
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> new Like(rs.getLong("LIKES.USER_ID"),
-                rs.getLong("LIKES.FILM_ID")), userId, filmId);
+                rs.getLong("LIKES.FILM_ID"), rs.getInt("LIKES.SCORE")), userId, filmId);
+    }
+
+    @Override
+    public List<Like> getAllLikes() {
+        String sqlQuery = "SELECT LIKES.USER_ID, LIKES.FILM_ID, LIKES.SCORE " +
+                "FROM LIKES ";
+        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> new Like(rs.getLong("LIKES.USER_ID"),
+                rs.getLong("LIKES.FILM_ID"), rs.getInt("LIKES.SCORE")));
     }
 
     @Override

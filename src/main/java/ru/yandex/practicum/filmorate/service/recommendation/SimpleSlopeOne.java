@@ -1,10 +1,15 @@
 package ru.yandex.practicum.filmorate.service.recommendation;
 
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
+@Service
 public class SimpleSlopeOne implements RecommendationService {
         private Map<Long, HashMap<Long, Double>> usersItemsMap;
         private double[][] diffTable;
