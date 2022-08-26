@@ -12,6 +12,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class Director {
+
     @NotBlank
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final String name;

@@ -49,11 +49,12 @@ public class FilmController {
     }
 
     @PutMapping("/films/{filmId}/like/{userId}")
-    public void addLikes(@PathVariable long filmId, @PathVariable long userId) {
+    public void addLikes(@PathVariable long filmId, @PathVariable long userId, @RequestParam(defaultValue = "10",
+            required = false) @Positive Integer score) {
         log.debug("Добавлен еще один лайк фильму: {} от пользователя c id = {}",
                 filmService.get(filmId).getName(),
                 userId);
-        likesService.addLikes(filmId, userId);
+        likesService.addOrUpdateLikes(filmId, userId, score);
     }
 
     @DeleteMapping("/films/{filmId}/like/{userId}")
@@ -87,7 +88,9 @@ public class FilmController {
     }
 
     @GetMapping("/films/popular")
-    public List<Film> findPopularFilmsByGenresAndYear(@RequestParam(defaultValue = "10", required = false) @Positive Integer count, @RequestParam(required = false) String year, @RequestParam(required = false) String genreId) {
+    public List<Film> findPopularFilmsByGenresAndYear(
+            @RequestParam(defaultValue = "10", required = false) @Positive Integer count,
+            @RequestParam(required = false) String year, @RequestParam(required = false) String genreId) {
         log.debug("Список из {} самых популярных фильмов по жанру с Id={} и году {}", count, year, genreId);
 
         return likesService.findPopularFilmsByGenresAndYear(count, year, genreId);

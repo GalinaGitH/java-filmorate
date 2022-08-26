@@ -8,12 +8,14 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class User {
+
     private long id;
     @NotNull
     @Email(message = "Email должен быть корректным адресом электронной почты")

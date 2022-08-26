@@ -56,6 +56,7 @@ create table IF NOT EXISTS LIKES
 (
     USER_ID BIGINT not null,
     FILM_ID BIGINT not null,
+    SCORE   INTEGER  not null,
     constraint LIKES_PK
        primary key (USER_ID,FILM_ID) ,
     constraint LIKES_FILMS_FILM_ID_FK

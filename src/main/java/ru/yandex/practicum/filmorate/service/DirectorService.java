@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.error.AlreadyExistException;
+import ru.yandex.practicum.filmorate.error.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
@@ -19,36 +19,42 @@ public class DirectorService {
     }
 
     public Director getById(int id) {
-        final Director directorById = directorStorage.getById(id);
-        if (directorById == null) {
-            throw new NotFoundException("Director with id=" + id + "not found");
-        }
-        return directorById;
+
+        return directorStorage
+                .getById(id)
+                .orElseThrow(() -> new NotFoundException("Director with id=" + id + "not found"));
     }
 
     public Director create(Director director) {
-        final Director directorFromStorage = directorStorage.getById(director.getId());
-        if (directorFromStorage == null) {
-            directorStorage.create(director);
-        } else throw new AlreadyExistException(String.format(
-                "Режиссер с таким id %s уже зарегистрирован.", director.getId()));
+
+        String message = "Режиссер с таким id %s уже зарегистрирован.";
+        directorStorage
+                .getById(director.getId())
+                .ifPresent(val -> {
+                            throw new AlreadyExistException(String.format(message, val.getId()));
+                        }
+                );
+
+        directorStorage.create(director);
         return director;
     }
 
     public Director update(Director director) {
-        final Director directorFromStorage = directorStorage.getById(director.getId());
-        if (directorFromStorage == null) {
-            throw new NotFoundException("Director with id=" + director.getId() + "not found");
-        }
+
+        directorStorage
+                .getById(director.getId())
+                .orElseThrow(() -> new NotFoundException("Director with id=" + director.getId() + " not found"));
+
         directorStorage.update(director);
         return director;
     }
 
     public void remove(int id) {
-        final Director directorFromStorage = directorStorage.getById(id);
-        if (directorFromStorage == null) {
-            throw new NotFoundException("Director with id=" + id + "not found");
-        }
-        directorStorage.remove(directorFromStorage);
+
+        directorStorage.remove(
+                directorStorage
+                        .getById(id)
+                        .orElseThrow(() -> new NotFoundException("Director with id=" + id + "not found"))
+        );
     }
 }

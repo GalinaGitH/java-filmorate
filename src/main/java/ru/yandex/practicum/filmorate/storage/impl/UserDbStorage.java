@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Primary
@@ -25,7 +26,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-        String sqlQuery = "insert into USERS (USER_NAME,USER_EMAIL,USER_LOGIN,USER_BIRTHDAY) values (?, ?, ?, ?)";
+        String sqlQuery = "INSERT INTO USERS (USER_NAME,USER_EMAIL,USER_LOGIN,USER_BIRTHDAY) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"USER_ID"});
@@ -41,15 +42,14 @@ public class UserDbStorage implements UserStorage {
             return stmt;
         }, keyHolder);
         user.setId(keyHolder.getKey().longValue());
-        long id = user.getId();
-        return get(id);
+        return user;
     }
 
     @Override
     public User update(User user) {
-        String sqlQuery = "update USERS set " +
+        String sqlQuery = "UPDATE USERS SET " +
                 "USER_NAME = ?, USER_EMAIL = ?, USER_LOGIN = ?,USER_BIRTHDAY = ? " +
-                "where USER_ID= ?";
+                "WHERE USER_ID= ?";
         jdbcTemplate.update(sqlQuery
                 , user.getName()
                 , user.getEmail()
@@ -62,32 +62,32 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void remove(User user) {
         long id = user.getId();
-        String sqlQuery = "delete from USERS where USER_ID = ?";
+        String sqlQuery = "DELETE FROM USERS WHERE USER_ID = ?";
         jdbcTemplate.update(sqlQuery, id);
     }
 
     @Override
-    public User get(long userId) {
-        final String sqlQuery = "select USER_ID,USER_NAME,USER_EMAIL,USER_LOGIN,USER_BIRTHDAY " +
-                "from USERS " +
-                "where USER_ID = ?";
+    public Optional<User> get(long userId) {
+        final String sqlQuery = "SELECT USER_ID,USER_NAME,USER_EMAIL,USER_LOGIN,USER_BIRTHDAY " +
+                "FROM USERS " +
+                "WHERE USER_ID = ?";
         final List<User> users = jdbcTemplate.query(sqlQuery, this::mapRowToUser, userId);
         if (users.size() != 1) {
-            return null;
+            return Optional.empty();
         }
-        return users.get(0);
+        return Optional.of(users.get(0));
     }
 
     @Override
     public List<User> findAllUsers() {
-        String sqlQuery = "select USER_ID,USER_NAME,USER_EMAIL,USER_LOGIN,USER_BIRTHDAY " +
-                "from USERS";
+        String sqlQuery = "SELECT USER_ID,USER_NAME,USER_EMAIL,USER_LOGIN,USER_BIRTHDAY " +
+                "FROM USERS";
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
     }
 
     @Override
     public void removeUserById(long userId) {
-        String sqlQuery = "delete from USERS where USER_ID = ?";
+        String sqlQuery = "DELETE FROM USERS WHERE USER_ID = ?";
         jdbcTemplate.update(sqlQuery, userId);
     }
 

@@ -7,14 +7,16 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.List;
+import java.sql.Types;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class DirectorDbStorage implements DirectorStorage {
@@ -27,15 +29,15 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public Director getById(int id) {
+    public Optional<Director> getById(int id) {
         final String sqlQuery = "select DIRECTOR_ID ,DIRECTOR_NAME " +
                 "FROM DIRECTORS " +
                 "where DIRECTOR_ID = ?";
         final List<Director> directors = jdbcTemplate.query(sqlQuery, this::mapRowToDirector, id);
         if (directors.size() != 1) {
-            return null;
+            return Optional.empty();
         }
-        return directors.get(0);
+        return Optional.of(directors.get(0));
     }
 
     @Override
@@ -125,18 +127,21 @@ public class DirectorDbStorage implements DirectorStorage {
                 "WHERE FILM_ID IN (SELECT FILM_ID FROM FILM_DIRECTORS WHERE DIRECTOR_ID = ?) " +
                 "ORDER BY FILM_RELEASE_DATE;";
         final List<Film> sortedFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, idDirector);
+        loadGenres(sortedFilms);
         return sortedFilms;
     }
 
     @Override
     public List<Film> getSortedFilmsByLikesOfDirector(int idDirector) {
-        String sqlQuery = "SELECT COUNT(*) as RATING, FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION," +
+        String sqlQuery = "SELECT AVG (LIKES.SCORE) as RATING, FILMS.FILM_ID, FILM_NAME," +
+                " FILM_RELEASE_DATE, FILM_DESCRIPTION," +
                 " FILM_DURATION, MPA.MPA_ID, MPA_TYPE " +
                 "FROM LIKES JOIN FILMS ON LIKES.FILM_ID = FILMS.FILM_ID JOIN MPA ON FILMS.MPA_ID = MPA.MPA_ID" +
                 " WHERE FILMS.FILM_ID IN (SELECT FILM_ID FROM FILM_DIRECTORS WHERE DIRECTOR_ID = ?)" +
                 " GROUP BY FILMS.FILM_ID" +
                 " ORDER BY RATING;";
         List<Film> sortedFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, idDirector);
+
 
         if (sortedFilms.isEmpty()) { //если лайков нет на конкретного режиссера
             sqlQuery = "SELECT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILM_DURATION," +
@@ -146,7 +151,7 @@ public class DirectorDbStorage implements DirectorStorage {
                     ";";
             sortedFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, idDirector);
         }
-
+        loadGenres(sortedFilms);
         return sortedFilms;
     }
 
@@ -167,5 +172,30 @@ public class DirectorDbStorage implements DirectorStorage {
                 .mpa(new Mpa(resultSet.getInt("MPA.MPA_ID"), resultSet.getString("MPA.MPA_TYPE")))
                 .build();
         return film;
+    }
+
+    private void loadGenres(List<Film> films) {
+        Map<Long, Film> idToFilm = films
+                .stream()
+                .collect(Collectors
+                        .toMap(Film::getId, film -> {
+                            film.setGenres(new HashSet<Genre>());
+                            return film;
+                        }, (a, b) -> b));
+        List<Long> ids = films.stream().map(Film::getId).collect(Collectors.toList());
+        String sql = String.join(",", Collections.nCopies(ids.size(), "?"));
+        sql = String.format("SELECT FG.GENRE_ID, FG.FILM_ID, GN.GENRE_NAME " +
+                "FROM FILM_GENRES AS FG JOIN GENRE_NAMES AS GN ON GN.GENRE_ID = FG.GENRE_ID" +
+                " WHERE FG.FILM_ID IN (%s)", sql);
+
+        int[] argTypes = new int[ids.size()];
+        Arrays.fill(argTypes, Types.BIGINT);
+
+        jdbcTemplate.query(sql, ids.toArray(), argTypes,
+                (rs, rowNum) ->
+                        idToFilm.get(rs.getLong("FILM_GENRES.FILM_ID")).getGenres()
+                                .add(new Genre(rs.getInt("FILM_GENRES.GENRE_ID"),
+                                        rs.getString("GENRE_NAMES.GENRE_NAME")))
+        );
     }
 }

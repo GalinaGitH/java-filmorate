@@ -14,7 +14,6 @@ import javax.validation.constraints.NotNull;
 @EqualsAndHashCode(of = "reviewId")
 public class Review {
 
-
     private long reviewId;
     @NotNull
     private Long userId; //пользователь
