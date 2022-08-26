@@ -4,9 +4,10 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DirectorStorage {
-    Director getById(int id);
+    Optional<Director> getById(int id);
 
     List<Director> getAll();
 

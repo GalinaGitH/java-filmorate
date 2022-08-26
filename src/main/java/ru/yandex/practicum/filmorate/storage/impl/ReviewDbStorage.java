@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -29,15 +30,15 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public Review get(long reviewId) {
+    public Optional<Review> get(long reviewId) {
         final String sqlQuery = "select REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT " +
                 "from REVIEWS " +
                 "where REVIEW_ID = ?";
         final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, reviewId);
         if (reviews.size() != 1) {
-            return null;
+            return Optional.empty();
         }
-        return reviews.get(0);
+        return Optional.of(reviews.get(0));
     }
 
     @Override
@@ -53,8 +54,7 @@ public class ReviewDbStorage implements ReviewStorage {
             return stmt;
         }, keyHolder);
         review.setReviewId(keyHolder.getKey().longValue());
-        long reviewId = review.getReviewId();
-        return get(reviewId);
+        return review;
     }
 
 
@@ -83,7 +83,8 @@ public class ReviewDbStorage implements ReviewStorage {
                 "where FILM_ID = ?" +
                 "GROUP BY REVIEW_ID ";
         final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, filmId);
-        List<Review> sorted = reviews.stream().sorted(Comparator.comparing(e -> e.getUseful(), Comparator.reverseOrder()))
+        List<Review> sorted = reviews.stream()
+                .sorted(Comparator.comparing(e -> e.getUseful(), Comparator.reverseOrder()))
                 .limit(count)
                 .collect(Collectors.toList());
         return sorted;
@@ -95,7 +96,9 @@ public class ReviewDbStorage implements ReviewStorage {
                 "from REVIEWS " +
                 "GROUP BY REVIEW_ID ";
         final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview);
-        List<Review> sorted = reviews.stream().sorted(Comparator.comparing(e -> e.getUseful(), Comparator.reverseOrder()))
+        List<Review> sorted = reviews
+                .stream()
+                .sorted(Comparator.comparing(e -> e.getUseful(), Comparator.reverseOrder()))
                 .limit(count)
                 .collect(Collectors.toList());
         return sorted;
@@ -133,7 +136,8 @@ public class ReviewDbStorage implements ReviewStorage {
                     "FROM REVIEW_LIKES " +
                     "WHERE IS_USEFUL = FALSE AND REVIEW_ID = ?" +
                     "GROUP BY REVIEW_ID";
-            usefulRate = jdbcTemplate.queryForObject(sqlQuery, cashflowQuefyArgs, new int[]{Types.BIGINT, Types.BIGINT}, Integer.class);
+            usefulRate = jdbcTemplate.queryForObject(sqlQuery, cashflowQuefyArgs,
+                    new int[]{Types.BIGINT, Types.BIGINT}, Integer.class);
         } catch (EmptyResultDataAccessException e) {
             return usefulRate;
         }

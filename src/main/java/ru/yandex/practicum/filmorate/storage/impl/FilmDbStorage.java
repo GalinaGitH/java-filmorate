@@ -11,8 +11,8 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,7 +30,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film create(Film film) {
-        String sqlQuery = "insert into FILMS (FILM_NAME,FILM_RELEASE_DATE,FILM_DESCRIPTION,FILM_DURATION,MPA_ID) values (?, ?, ?, ?,?)";
+        String sqlQuery = "insert into " +
+                "FILMS (FILM_NAME,FILM_RELEASE_DATE,FILM_DESCRIPTION,FILM_DURATION,MPA_ID) values (?, ?, ?, ?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"FILM_ID"});
@@ -73,23 +74,25 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film get(long filmId) {
-        final String sqlQuery = "select FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION , MPA.MPA_ID, MPA.MPA_TYPE " +
+    public Optional<Film> get(long filmId) {
+        final String sqlQuery = "select FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION," +
+                " MPA.MPA_ID, MPA.MPA_TYPE " +
                 "from FILMS " +
                 "Join MPA ON MPA.MPA_ID=FILMS.MPA_ID " +
                 "where FILM_ID = ?";
         final List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, filmId);
         loadGenres(films);
         if (films.size() != 1) {
-            return null;
+            return Optional.empty();
         }
-        return films.get(0);
+        return Optional.of(films.get(0));
     }
 
 
     @Override
     public List<Film> findAll() {
-        String sqlQuery = "select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION , MPA.MPA_ID, MPA.MPA_TYPE " +
+        String sqlQuery = "select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION," +
+                " MPA.MPA_ID, MPA.MPA_TYPE " +
                 "from FILMS " +
                 "Join MPA ON MPA.MPA_ID=FILMS.MPA_ID";
         List<Film> filmsDB = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
@@ -105,7 +108,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getLikedByUser(long userId) {
-        String sqlQuery = "SELECT DISTINCT FILMS.FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION," +
+        String sqlQuery = "SELECT DISTINCT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, " +
+                "FILM_DURATION," +
                 " MPA.MPA_ID, MPA_TYPE " +
                 "FROM FILMS JOIN LIKES ON FILMS.FILM_ID = LIKES.FILM_ID " +
                 "JOIN MPA  ON MPA.MPA_ID = FILMS.MPA_ID" +
@@ -117,7 +121,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getLikedByUserSortedPopular(long userId) {
-        String sqlQuery = "SELECT DISTINCT FILMS.FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION, COUNT(L.USER_ID) AS CNT, " +
+        String sqlQuery = "SELECT DISTINCT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION," +
+                " FILM_DURATION, COUNT(L.USER_ID) AS CNT, " +
                 " MPA.MPA_ID, MPA_TYPE, L.USER_ID " +
                 " FROM FILMS JOIN LIKES AS L ON FILMS.FILM_ID = L.FILM_ID " +
                 " JOIN MPA  ON MPA.MPA_ID = FILMS.MPA_ID " +
@@ -130,7 +135,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getFilmsFromIds(List <Long> idFilms) {
+    public List<Film> getFilmsFromIds(List<Long> idFilms) {
         String sql = String.join(",", Collections.nCopies(idFilms.size(), "?"));
         sql = String.format("select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION ," +
                 " MPA.MPA_ID, MPA.MPA_TYPE " +
@@ -155,7 +160,8 @@ public class FilmDbStorage implements FilmStorage {
                 .map(Map.Entry::getValue)
                 .peek(entry -> params.add("%" + query.toLowerCase() + "%"))
                 .collect(Collectors.toList());
-        String qbuilder = " SELECT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILM_DURATION, MPA.MPA_ID, MPA.MPA_TYPE, DIRECTOR_NAME" +
+        String qbuilder = " SELECT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILM_DURATION," +
+                " MPA.MPA_ID, MPA.MPA_TYPE, DIRECTOR_NAME" +
                 " FROM" +
                 " FILMS LEFT JOIN MPA ON MPA.MPA_ID=FILMS.MPA_ID LEFT JOIN FILM_DIRECTORS" +
                 " ON FILMS.FILM_ID = FILM_DIRECTORS.FILM_ID" +

@@ -4,9 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSortBy;
+import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.service.recommendation.RecommendationService;
-import ru.yandex.practicum.filmorate.storage.*;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.LikesStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,12 +30,18 @@ public class FilmService {
      * добавление фильма
      */
     public Film saveFilm(Film film) {
-        final Film filmFromStorage = filmStorage.get(film.getId());
-        if (filmFromStorage == null) {
-            filmStorage.create(film);
-            directorStorage.setFilmDirector(film);
-        } else throw new AlreadyExistException(String.format(
-                "Фильм с таким id %s уже зарегистрирован.", film.getId()));
+
+        filmStorage
+                .get(film.getId())
+                .ifPresent(
+                        (val) -> {
+                            throw new AlreadyExistException(String.format(
+                                    "Фильм с таким id %s уже зарегистрирован.", film.getId()));
+                        }
+                );
+
+        filmStorage.create(film);
+        directorStorage.setFilmDirector(film);
         return film;
     }
 
@@ -38,10 +49,11 @@ public class FilmService {
      * обновление фильма
      */
     public Film updateFilm(Film film) {
-        final Film filmInStorage = filmStorage.get(film.getId());
-        if (filmInStorage == null) {
-            throw new NotFoundException("Film with id=" + film.getId() + "not found");
-        }
+
+        filmStorage
+                .get(film.getId())
+                .orElseThrow(() -> new NotFoundException("Film with id=" + film.getId() + "not found"));
+
         filmStorage.update(film);
         directorStorage.setFilmDirector(film);
         if (film.getDirectors().isEmpty()) {
@@ -51,20 +63,14 @@ public class FilmService {
     }
 
     /**
-     * удаление фильма
-     */
-    public void deleteFilm(Film film) {
-        filmStorage.remove(film);
-    }
-
-    /**
      * получение фильма по id
      */
     public Film get(long filmId) {
-        final Film film = filmStorage.get(filmId);
-        if (film == null) {
-            throw new NotFoundException("Film with id=" + filmId + "not found");
-        }
+
+        Film film = filmStorage
+                .get(filmId)
+                .orElseThrow(() -> new NotFoundException("Film with id=" + filmId + "not found"));
+
         film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
         return film;
     }
@@ -85,18 +91,19 @@ public class FilmService {
      * удаление фильма по Id
      */
     public void deleteFilmById(long filmId) {
-        final Film film = filmStorage.get(filmId);
-        if (film == null) {
-            throw new NotFoundException("Film with id=" + filmId + "not found");
-        }
+
+        filmStorage
+                .get(filmId)
+                .orElseThrow(() -> new NotFoundException("Film with id=" + filmId + "not found"));
+
         filmStorage.removeFilmById(filmId);
     }
 
     public List<Film> getRecommended(long id) {
-        final User user = userStorage.get(id);
-        if (user == null) {
-            throw new NotFoundException("User  not found");
-        }
+        userStorage
+                .get(id)
+                .orElseThrow(() -> new NotFoundException("User  not found"));
+
         Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms = prepareUsersFilmsForRecommendationService();
         recommendationService.setUsersItemsMap(idsUsersAndIdsFilms);
         List<Long> recIdsFilms = recommendationService.getRecommendedIdsItemForUser(id);
@@ -163,10 +170,10 @@ public class FilmService {
     }
 
     private void checkDirector(int idDirector) {
-        final Director directorFromStorage = directorStorage.getById(idDirector);
-        if (directorFromStorage == null) {
-            throw new NotFoundException("Director with id=" + idDirector + "not found");
-        }
+
+        directorStorage
+                .getById(idDirector)
+                .orElseThrow(() -> new NotFoundException("Director with id=" + idDirector + "not found"));
     }
 
     private List<Film> setDirectorsAndGenresToFilms(List<Film> filmsFromStorage) {

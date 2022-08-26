@@ -21,6 +21,8 @@ public class GenreService {
         if (genreId > 6 || genreId < 1) {
             throw new NotFoundException("Genre with id=" + genreId + "not found");
         }
-        return genreStorage.getById(genreId);
+        return genreStorage
+                .getById(genreId)
+                .orElseThrow(() -> new NotFoundException("Genre with id=" + genreId + "not found"));
     }
 }

@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Primary
@@ -41,8 +42,7 @@ public class UserDbStorage implements UserStorage {
             return stmt;
         }, keyHolder);
         user.setId(keyHolder.getKey().longValue());
-        long id = user.getId();
-        return get(id);
+        return user;
     }
 
     @Override
@@ -67,15 +67,15 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User get(long userId) {
+    public Optional<User> get(long userId) {
         final String sqlQuery = "select USER_ID,USER_NAME,USER_EMAIL,USER_LOGIN,USER_BIRTHDAY " +
                 "from USERS " +
                 "where USER_ID = ?";
         final List<User> users = jdbcTemplate.query(sqlQuery, this::mapRowToUser, userId);
         if (users.size() != 1) {
-            return null;
+            return Optional.empty();
         }
-        return users.get(0);
+        return Optional.of(users.get(0));
     }
 
     @Override

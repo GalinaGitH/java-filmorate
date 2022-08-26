@@ -51,8 +51,9 @@ public class LikesDbStorage implements LikesStorage {
                 , score
         );
     }
+
     @Override
-    public void updateLikes(long filmId, long userId, Integer score){
+    public void updateLikes(long filmId, long userId, Integer score) {
         String sqlQuery = "MERGE INTO LIKES (FILM_ID, USER_ID, SCORE) values (?,?,?) ";
         jdbcTemplate.update(sqlQuery
                 , filmId
@@ -69,7 +70,8 @@ public class LikesDbStorage implements LikesStorage {
 
     @Override
     public List<Film> findPopularFilm(Integer size) {
-        String sqlQuery = "SELECT FILMS.FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION , MPA.MPA_ID, MPA.MPA_TYPE " +
+        String sqlQuery = "SELECT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILM_DURATION," +
+                " MPA.MPA_ID, MPA.MPA_TYPE " +
                 "FROM FILMS " +
                 "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
                 "JOIN MPA ON MPA.MPA_ID=FILMS.MPA_ID " +

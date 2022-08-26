@@ -23,11 +23,14 @@ public class FriendsService {
      * Условие:
      */
     public void addFriend(long userId, long friendId) {
-        final User user = userStorage.get(userId);
-        final User friend = userStorage.get(friendId);
-        if (user == null || friend == null) {
-            throw new NotFoundException("User  not found");
-        }
+
+        userStorage
+                .get(userId)
+                .orElseThrow(() -> new NotFoundException("User  not found"));
+        userStorage
+                .get(friendId)
+                .orElseThrow(() -> new NotFoundException("User  not found"));
+
         feedService.addFriendInFeed(userId, friendId);
         friendStorage.addFriend(userId, friendId);
     }
@@ -36,11 +39,14 @@ public class FriendsService {
      * удаление из друзей
      */
     public void removeFriend(long userId, long friendId) {
-        final User user = userStorage.get(userId);
-        final User friend = userStorage.get(friendId);
-        if (user == null || friend == null) {
-            throw new NotFoundException("User  not found");
-        }
+
+        userStorage
+                .get(userId)
+                .orElseThrow(() -> new NotFoundException("User  not found"));
+        userStorage
+                .get(friendId)
+                .orElseThrow(() -> new NotFoundException("User  not found"));
+
         feedService.removeFriendInFeed(userId, friendId);
         friendStorage.removeFriend(userId, friendId);
     }
@@ -56,10 +62,11 @@ public class FriendsService {
      * вывод списка друзей пользователя
      */
     public List<User> getListOfFriends(long userId) {
-        final User user = userStorage.get(userId);
-        if (user == null) {
-            throw new NotFoundException("User with id=" + userId + "not found");
-        }
+
+        userStorage
+                .get(userId)
+                .orElseThrow(() -> new NotFoundException("User  not found"));
+
         return friendStorage.getListOfFriends(userId);
     }
 }

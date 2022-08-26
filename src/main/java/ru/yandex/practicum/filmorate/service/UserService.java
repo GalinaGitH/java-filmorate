@@ -19,15 +19,21 @@ public class UserService {
      * сохранение пользователя
      */
     public User saveUser(User user) {
-        final User userInStorage = userStorage.get(user.getId());
-        if (userInStorage == null) {
-            String name = user.getName();
-            if (name.isBlank()) {
-                user.setName(user.getLogin());
-            }
-            userStorage.createUser(user);
-        } else throw new AlreadyExistException(String.format(
-                "Пользователь с таким id %s уже зарегистрирован.", user.getId()));
+
+        userStorage
+                .get(user.getId())
+                .ifPresent((val) -> {
+                            throw new AlreadyExistException(String.format("Пользователь с таким id %s" +
+                                    " уже зарегистрирован.", user.getId()));
+                        }
+                );
+
+        String name = user.getName();
+        if (name.isBlank()) {
+            user.setName(user.getLogin());
+        }
+        userStorage.createUser(user);
+
         return user;
     }
 
@@ -35,19 +41,14 @@ public class UserService {
      * изменение пользователя
      */
     public User updateUser(User user) {
-        final User userInStorage = userStorage.get(user.getId());
-        if (userInStorage == null) {
-            throw new NotFoundException("User with id=" + user.getId() + "not found");
-        }
-        userStorage.update(user);
-        return user;
-    }
 
-    /**
-     * даление пользователя
-     */
-    public void delete(User user) {
-        userStorage.remove(user);
+        userStorage
+                .get(user.getId())
+                .orElseThrow(() -> new NotFoundException("User with id=" + user.getId() + "not found"));
+
+        userStorage.update(user);
+
+        return user;
     }
 
     /**
@@ -61,21 +62,21 @@ public class UserService {
      * получение пользователя по id
      */
     public User get(long userId) {
-        final User user = userStorage.get(userId);
-        if (user == null) {
-            throw new NotFoundException("User with id=" + userId + "not found");
-        }
-        return user;
+
+        return userStorage
+                .get(userId)
+                .orElseThrow(() -> new NotFoundException("User with id=" + userId + "not found"));
     }
 
     /**
      * удаление пользователя по id
      */
     public void deleteUserById(long userId) {
-        final User user = userStorage.get(userId);
-        if (user == null) {
-            throw new NotFoundException("User with id=" + userId + "not found");
-        }
+
+        userStorage
+                .get(userId)
+                .orElseThrow(() -> new NotFoundException("User with id=" + userId + "not found"));
+
         userStorage.removeUserById(userId);
     }
 

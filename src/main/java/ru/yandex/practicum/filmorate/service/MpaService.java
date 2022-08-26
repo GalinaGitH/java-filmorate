@@ -18,11 +18,10 @@ public class MpaService {
      * получение рейтинга(MPA) по идентификатору
      */
     public Mpa getById(long id) {
-        Mpa mpa = mpaStorage.getById(id);
-        if (mpa == null) {
-            throw new NotFoundException("MPA with id=" + id + "not found");
-        }
-        return mpa;
+
+        return mpaStorage
+                .getById(id)
+                .orElseThrow(() -> new NotFoundException("MPA with id=" + id + "not found"));
     }
 
     /**

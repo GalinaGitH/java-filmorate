@@ -29,15 +29,15 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public Director getById(int id) {
+    public Optional<Director> getById(int id) {
         final String sqlQuery = "select DIRECTOR_ID ,DIRECTOR_NAME " +
                 "FROM DIRECTORS " +
                 "where DIRECTOR_ID = ?";
         final List<Director> directors = jdbcTemplate.query(sqlQuery, this::mapRowToDirector, id);
         if (directors.size() != 1) {
-            return null;
+            return Optional.empty();
         }
-        return directors.get(0);
+        return Optional.of(directors.get(0));
     }
 
     @Override
@@ -133,7 +133,8 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public List<Film> getSortedFilmsByLikesOfDirector(int idDirector) {
-        String sqlQuery = "SELECT AVG (LIKES.SCORE) as RATING, FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION," +
+        String sqlQuery = "SELECT AVG (LIKES.SCORE) as RATING, FILMS.FILM_ID, FILM_NAME," +
+                " FILM_RELEASE_DATE, FILM_DESCRIPTION," +
                 " FILM_DURATION, MPA.MPA_ID, MPA_TYPE " +
                 "FROM LIKES JOIN FILMS ON LIKES.FILM_ID = FILMS.FILM_ID JOIN MPA ON FILMS.MPA_ID = MPA.MPA_ID" +
                 " WHERE FILMS.FILM_ID IN (SELECT FILM_ID FROM FILM_DIRECTORS WHERE DIRECTOR_ID = ?)" +
@@ -172,6 +173,7 @@ public class DirectorDbStorage implements DirectorStorage {
                 .build();
         return film;
     }
+
     private void loadGenres(List<Film> films) {
         Map<Long, Film> idToFilm = films
                 .stream()
