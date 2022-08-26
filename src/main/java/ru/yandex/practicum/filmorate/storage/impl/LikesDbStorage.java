@@ -64,7 +64,7 @@ public class LikesDbStorage implements LikesStorage {
 
     @Override
     public void removeLikes(long filmId, long userId) {
-        String sqlQuery = "delete from LIKES where FILM_ID = ? AND USER_ID = ?";
+        String sqlQuery = "DELETE FROM LIKES WHERE FILM_ID = ? AND USER_ID = ?";
         jdbcTemplate.update(sqlQuery, filmId, userId);
     }
 

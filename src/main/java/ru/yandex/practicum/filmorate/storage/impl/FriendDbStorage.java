@@ -24,7 +24,7 @@ public class FriendDbStorage implements FriendStorage {
 
     @Override
     public void addFriend(long userId, long friendId) {
-        String sqlQuery = "INSERT INTO FRIENDS (USER_ID, FRIEND_ID) values (?,?) ";
+        String sqlQuery = "INSERT INTO FRIENDS (USER_ID, FRIEND_ID) VALUES (?,?) ";
         jdbcTemplate.update(sqlQuery
                 , userId
                 , friendId);
@@ -32,7 +32,7 @@ public class FriendDbStorage implements FriendStorage {
 
     @Override
     public void removeFriend(long userId, long friendId) {
-        String sqlQuery = "delete from FRIENDS where USER_ID = ? AND FRIEND_ID = ?";
+        String sqlQuery = "DELETE FROM FRIENDS where USER_ID = ? AND FRIEND_ID = ?";
         jdbcTemplate.update(sqlQuery, userId, friendId);
     }
 
@@ -46,11 +46,11 @@ public class FriendDbStorage implements FriendStorage {
 
     @Override
     public List<User> getListOfFriends(long userId) {
-        String sqlQuery = "select U2.USER_ID, U2.USER_NAME, U2.USER_EMAIL, U2.USER_LOGIN, U2.USER_BIRTHDAY " +
-                "from USERS U " +
-                "Join FRIENDS F ON U.USER_ID=F.USER_ID " +
-                "Join USERS U2 ON U2.USER_ID= F.FRIEND_ID " +
-                "where U.USER_ID = ?";
+        String sqlQuery = "SELECT U2.USER_ID, U2.USER_NAME, U2.USER_EMAIL, U2.USER_LOGIN, U2.USER_BIRTHDAY " +
+                "FROM USERS U " +
+                "JOIN FRIENDS F ON U.USER_ID=F.USER_ID " +
+                "JOIN USERS U2 ON U2.USER_ID= F.FRIEND_ID " +
+                "WHERE U.USER_ID = ?";
         final List<User> friends = jdbcTemplate.query(sqlQuery, this::mapRowToFriend, userId);
         return friends;
     }

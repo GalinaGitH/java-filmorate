@@ -30,8 +30,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film create(Film film) {
-        String sqlQuery = "insert into " +
-                "FILMS (FILM_NAME,FILM_RELEASE_DATE,FILM_DESCRIPTION,FILM_DURATION,MPA_ID) values (?, ?, ?, ?,?)";
+        String sqlQuery = "INSERT into " +
+                "FILMS (FILM_NAME,FILM_RELEASE_DATE,FILM_DESCRIPTION,FILM_DURATION,MPA_ID) VALUES (?, ?, ?, ?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"FILM_ID"});
@@ -51,9 +51,9 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        String sqlQuery = "update FILMS set " +
+        String sqlQuery = "UPDATE FILMS SET " +
                 "FILM_NAME = ?, FILM_RELEASE_DATE = ?, FILM_DESCRIPTION = ?,FILM_DURATION = ? , MPA_ID =? " +
-                "where FILM_ID = ?";
+                "WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlQuery
                 , film.getName()
                 , film.getReleaseDate()
@@ -69,17 +69,17 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void remove(Film film) {
         long id = film.getId();
-        String sqlQuery = "delete from FILMS where FILM_ID = ?";
+        String sqlQuery = "DELETE FROM FILMS WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, id);
     }
 
     @Override
     public Optional<Film> get(long filmId) {
-        final String sqlQuery = "select FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION," +
+        final String sqlQuery = "SELECT FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION," +
                 " MPA.MPA_ID, MPA.MPA_TYPE " +
-                "from FILMS " +
-                "Join MPA ON MPA.MPA_ID=FILMS.MPA_ID " +
-                "where FILM_ID = ?";
+                "FROM FILMS " +
+                "JOIN MPA ON MPA.MPA_ID=FILMS.MPA_ID " +
+                "WHERE FILM_ID = ?";
         final List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, filmId);
         loadGenres(films);
         if (films.size() != 1) {
@@ -91,10 +91,10 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> findAll() {
-        String sqlQuery = "select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION," +
+        String sqlQuery = "SELECT  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION," +
                 " MPA.MPA_ID, MPA.MPA_TYPE " +
-                "from FILMS " +
-                "Join MPA ON MPA.MPA_ID=FILMS.MPA_ID";
+                "FROM FILMS " +
+                "JOIN MPA ON MPA.MPA_ID=FILMS.MPA_ID";
         List<Film> filmsDB = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
         loadGenres(filmsDB);
         return filmsDB;
@@ -102,7 +102,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void removeFilmById(long filmId) {
-        String sqlQuery = "delete from FILMS where FILM_ID = ?";
+        String sqlQuery = "DELETE FROM FILMS WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, filmId);
     }
 
@@ -137,10 +137,10 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getFilmsFromIds(List<Long> idFilms) {
         String sql = String.join(",", Collections.nCopies(idFilms.size(), "?"));
-        sql = String.format("select  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION ," +
+        sql = String.format("SELECT  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION ," +
                 " MPA.MPA_ID, MPA.MPA_TYPE " +
-                "from FILMS Join MPA ON MPA.MPA_ID=FILMS.MPA_ID " +
-                "where FILM_ID IN (%s)", sql);
+                "FROM FILMS Join MPA ON MPA.MPA_ID=FILMS.MPA_ID " +
+                "WHERE FILM_ID IN (%s)", sql);
         int[] argTypes = new int[idFilms.size()];
         Arrays.fill(argTypes, Types.BIGINT);
         List<Film> films = jdbcTemplate.query(sql, idFilms.toArray(), argTypes, this::mapRowToFilm);
@@ -189,7 +189,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private void saveGenres(Film film) {
         long id = film.getId();
-        String sqlDelete = "delete from FILM_GENRES where FILM_ID = ?";
+        String sqlDelete = "DELETE FROM FILM_GENRES WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlDelete, id);
         if (film.getGenres() == null || film.getGenres().isEmpty()) {
             return;

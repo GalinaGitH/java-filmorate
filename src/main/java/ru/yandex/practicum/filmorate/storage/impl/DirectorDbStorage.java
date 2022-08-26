@@ -30,9 +30,9 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Optional<Director> getById(int id) {
-        final String sqlQuery = "select DIRECTOR_ID ,DIRECTOR_NAME " +
+        final String sqlQuery = "SELECT DIRECTOR_ID ,DIRECTOR_NAME " +
                 "FROM DIRECTORS " +
-                "where DIRECTOR_ID = ?";
+                "WHERE DIRECTOR_ID = ?";
         final List<Director> directors = jdbcTemplate.query(sqlQuery, this::mapRowToDirector, id);
         if (directors.size() != 1) {
             return Optional.empty();
@@ -42,7 +42,7 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public List<Director> getAll() {
-        String sqlQuery = "select  DIRECTOR_ID ,DIRECTOR_NAME " +
+        String sqlQuery = "SELECT  DIRECTOR_ID ,DIRECTOR_NAME " +
                 "FROM DIRECTORS ";
         return jdbcTemplate.query(sqlQuery, this::mapRowToDirector);
     }
@@ -53,7 +53,7 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public void setFilmDirector(Film film) {
         long id = film.getId();
-        String sqlDelete = "delete from FILM_DIRECTORS where FILM_ID = ?";
+        String sqlDelete = "DELETE FROM FILM_DIRECTORS WHERE FILM_ID = ?";
 
         jdbcTemplate.update(sqlDelete, id);
         if (film.getDirectors() == null) {
@@ -90,7 +90,7 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Director create(Director director) {
-        String sqlQuery = "insert into DIRECTORS (DIRECTOR_NAME) values (?)";
+        String sqlQuery = "INSERT INTO DIRECTORS (DIRECTOR_NAME) VALUES (?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"DIRECTOR_ID"});
@@ -103,9 +103,9 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Director update(Director director) {
-        String sqlQuery = "update DIRECTORS set " +
+        String sqlQuery = "UPDATE DIRECTORS set " +
                 "DIRECTOR_NAME = ? " +
-                "where DIRECTOR_ID = ?";
+                "WHERE DIRECTOR_ID = ?";
         jdbcTemplate.update(sqlQuery
                 , director.getName()
                 , director.getId());
@@ -115,7 +115,7 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public void remove(Director director) {
         int id = director.getId();
-        String sqlQuery = "delete from DIRECTORS where DIRECTOR_ID = ?";
+        String sqlQuery = "DELETE FROM DIRECTORS WHERE DIRECTOR_ID = ?";
         jdbcTemplate.update(sqlQuery, id);
     }
 

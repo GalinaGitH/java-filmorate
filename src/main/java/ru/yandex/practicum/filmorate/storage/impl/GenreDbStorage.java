@@ -23,9 +23,9 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Optional<Genre> getById(long id) {
-        final String sqlQuery = "select GENRE_ID ,GENRE_NAME " +
+        final String sqlQuery = "SELECT GENRE_ID ,GENRE_NAME " +
                 "FROM GENRE_NAMES " +
-                "where GENRE_ID = ?";
+                "WHERE GENRE_ID = ?";
         final List<Genre> genres = jdbcTemplate.query(sqlQuery, this::mapRowToGenre, id);
         if (genres.size() != 1) {
             return Optional.empty();
@@ -36,7 +36,7 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public List<Genre> getAll() {
-        String sqlQuery = "select  GENRE_ID ,GENRE_NAME " +
+        String sqlQuery = "SELECT  GENRE_ID ,GENRE_NAME " +
                 "FROM GENRE_NAMES ";
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
     }
