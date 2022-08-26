@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.error.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
@@ -49,11 +49,11 @@ public class LikesService {
 
         filmStorage
                 .get(filmId)
-                .orElseThrow(() -> new NotFoundException("Film or User  not found"));
+                .orElseThrow(() -> new NotFoundException("Film or User not found"));
 
         userStorage
                 .get(userId)
-                .orElseThrow(() -> new NotFoundException("Film or User  not found"));
+                .orElseThrow(() -> new NotFoundException("Film or User not found"));
 
         feedService.removeLikeFilmInFeed(filmId, userId);
         likesStorage.removeLikes(filmId, userId);

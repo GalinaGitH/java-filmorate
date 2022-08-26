@@ -8,12 +8,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class SimpleSlopeOne implements RecommendationService {
+
+    private final static double epsCompareDouble = 0.0000001;
+    private final Map<Long, Integer> itemIdToIndex = new HashMap<>();
+    private final Map<Integer, Long> indexToItemId = new HashMap<>();
     private Map<Long, HashMap<Long, Double>> usersItemsMap;
     private double[][] diffTable;
     private int[][] weightsTable;
-    private final Map<Long, Integer> itemIdToIndex = new HashMap<>();
-    private final Map<Integer, Long> indexToItemId = new HashMap<>();
-    private final static double epsCompareDouble = 0.0000001;
 
     public SimpleSlopeOne() {
     }

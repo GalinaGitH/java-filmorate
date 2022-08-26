@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.error.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -26,10 +26,10 @@ public class FriendsService {
 
         userStorage
                 .get(userId)
-                .orElseThrow(() -> new NotFoundException("User  not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
         userStorage
                 .get(friendId)
-                .orElseThrow(() -> new NotFoundException("User  not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         feedService.addFriendInFeed(userId, friendId);
         friendStorage.addFriend(userId, friendId);
@@ -42,10 +42,10 @@ public class FriendsService {
 
         userStorage
                 .get(userId)
-                .orElseThrow(() -> new NotFoundException("User  not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
         userStorage
                 .get(friendId)
-                .orElseThrow(() -> new NotFoundException("User  not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         feedService.removeFriendInFeed(userId, friendId);
         friendStorage.removeFriend(userId, friendId);
@@ -65,7 +65,7 @@ public class FriendsService {
 
         userStorage
                 .get(userId)
-                .orElseThrow(() -> new NotFoundException("User  not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         return friendStorage.getListOfFriends(userId);
     }

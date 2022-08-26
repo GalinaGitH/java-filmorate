@@ -31,9 +31,9 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Optional<Review> get(long reviewId) {
-        final String sqlQuery = "select REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT " +
-                "from REVIEWS " +
-                "where REVIEW_ID = ?";
+        final String sqlQuery = " SELECT REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT " +
+                " FROM REVIEWS " +
+                " WHERE REVIEW_ID = ?";
         final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, reviewId);
         if (reviews.size() != 1) {
             return Optional.empty();
@@ -43,7 +43,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Review create(Review review) {
-        String sqlQuery = "insert into REVIEWS (USER_ID,FILM_ID,IS_POSITIVE,CONTENT) values (?, ?, ?, ?)";
+        String sqlQuery = " INSERT INTO REVIEWS (USER_ID,FILM_ID,IS_POSITIVE,CONTENT) values (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"REVIEW_ID"});
@@ -60,9 +60,9 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Review update(Review review) {
-        String sqlQuery = "update REVIEWS set " +
-                "IS_POSITIVE = ?,CONTENT = ? " +
-                "where REVIEW_ID= ?";
+        String sqlQuery = " UPDATE REVIEWS SET " +
+                " IS_POSITIVE = ?,CONTENT = ? " +
+                " WHERE REVIEW_ID= ?";
         jdbcTemplate.update(sqlQuery
                 , review.getIsPositive()
                 , review.getContent()
@@ -72,16 +72,16 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public void remove(long reviewId) {
-        String sqlQuery = "delete from REVIEWS where REVIEW_ID = ?";
+        String sqlQuery = " DELETE FROM REVIEWS WHERE REVIEW_ID = ?";
         jdbcTemplate.update(sqlQuery, reviewId);
     }
 
     @Override
     public List<Review> getReviewByFilmId(long filmId, int count) {
-        final String sqlQuery = "select REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT " +
-                "from REVIEWS " +
-                "where FILM_ID = ?" +
-                "GROUP BY REVIEW_ID ";
+        final String sqlQuery = " SELECT REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT " +
+                " FROM REVIEWS " +
+                " WHERE FILM_ID = ?" +
+                " GROUP BY REVIEW_ID ";
         final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, filmId);
         List<Review> sorted = reviews.stream()
                 .sorted(Comparator.comparing(e -> e.getUseful(), Comparator.reverseOrder()))
@@ -92,9 +92,9 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public List<Review> getAllReview(int count) {
-        final String sqlQuery = "select REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT " +
-                "from REVIEWS " +
-                "GROUP BY REVIEW_ID ";
+        final String sqlQuery = " SELECT REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT " +
+                " FROM REVIEWS " +
+                " GROUP BY REVIEW_ID ";
         final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview);
         List<Review> sorted = reviews
                 .stream()
@@ -124,19 +124,19 @@ public class ReviewDbStorage implements ReviewStorage {
      * Если как бесполезный, то уменьшает на 1.
      */
     private int getUsefulRate(long reviewId) {
-        int usefulRate = 0;
+        Integer usefulRate = 0;
         try {
-            Object[] cashflowQuefyArgs = new Object[]{reviewId, reviewId};
-            final String sqlQuery = "SELECT COUNT(USER_ID) AS usefulRate " +
-                    "FROM REVIEW_LIKES " +
-                    "WHERE IS_USEFUL = TRUE  AND REVIEW_ID = ? " +
-                    "GROUP BY REVIEW_ID " +
-                    "UNION ALL " +
-                    "SELECT - 1 * COUNT(USER_ID) AS usefulRate " +
-                    "FROM REVIEW_LIKES " +
-                    "WHERE IS_USEFUL = FALSE AND REVIEW_ID = ?" +
-                    "GROUP BY REVIEW_ID";
-            usefulRate = jdbcTemplate.queryForObject(sqlQuery, cashflowQuefyArgs,
+            Object[] cashFlowQueryArgs = new Object[]{reviewId, reviewId};
+            final String sqlQuery = " SELECT COUNT(USER_ID) AS usefulRate " +
+                    " FROM REVIEW_LIKES " +
+                    " WHERE IS_USEFUL = TRUE  AND REVIEW_ID = ? " +
+                    " GROUP BY REVIEW_ID " +
+                    " UNION ALL " +
+                    " SELECT - 1 * COUNT(USER_ID) AS usefulRate " +
+                    " FROM REVIEW_LIKES " +
+                    " WHERE IS_USEFUL = FALSE AND REVIEW_ID = ?" +
+                    " GROUP BY REVIEW_ID";
+            usefulRate = jdbcTemplate.queryForObject(sqlQuery, cashFlowQueryArgs,
                     new int[]{Types.BIGINT, Types.BIGINT}, Integer.class);
         } catch (EmptyResultDataAccessException e) {
             return usefulRate;

@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.error.AlreadyExistException;
+import ru.yandex.practicum.filmorate.error.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
@@ -27,11 +27,11 @@ public class DirectorService {
 
     public Director create(Director director) {
 
+        String message = "Режиссер с таким id %s уже зарегистрирован.";
         directorStorage
                 .getById(director.getId())
                 .ifPresent(val -> {
-                            throw new AlreadyExistException(String.format("Режиссер с таким id %s уже зарегистрирован."
-                                    , val.getId()));
+                            throw new AlreadyExistException(String.format(message, val.getId()));
                         }
                 );
 

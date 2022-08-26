@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.error.AlreadyExistException;
+import ru.yandex.practicum.filmorate.error.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmSortBy;
 import ru.yandex.practicum.filmorate.model.Like;
@@ -30,13 +30,11 @@ public class FilmService {
      * добавление фильма
      */
     public Film saveFilm(Film film) {
-
+        String message = "Фильм с таким id %s уже зарегистрирован.";
         filmStorage
                 .get(film.getId())
-                .ifPresent(
-                        (val) -> {
-                            throw new AlreadyExistException(String.format(
-                                    "Фильм с таким id %s уже зарегистрирован.", film.getId()));
+                .ifPresent(val -> {
+                            throw new AlreadyExistException(String.format(message, film.getId()));
                         }
                 );
 
@@ -102,7 +100,7 @@ public class FilmService {
     public List<Film> getRecommended(long id) {
         userStorage
                 .get(id)
-                .orElseThrow(() -> new NotFoundException("User  not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms = prepareUsersFilmsForRecommendationService();
         recommendationService.setUsersItemsMap(idsUsersAndIdsFilms);

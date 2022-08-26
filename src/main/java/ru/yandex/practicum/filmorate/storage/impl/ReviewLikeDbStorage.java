@@ -19,7 +19,7 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
 
     @Override
     public void create(ReviewLike reviewLike) {
-        String sqlQuery = "INSERT INTO REVIEW_LIKES (REVIEW_ID, USER_ID, IS_USEFUL) values (?,?,?)";
+        String sqlQuery = "INSERT INTO REVIEW_LIKES (REVIEW_ID, USER_ID, IS_USEFUL) VALUES (?,?,?)";
         jdbcTemplate.update(sqlQuery
                 , reviewLike.getReviewId()
                 , reviewLike.getUserId()
@@ -28,7 +28,7 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
 
     @Override
     public void removeReviewLike(ReviewLike reviewLike) {
-        String sqlQuery = "delete from REVIEW_LIKES where REVIEW_ID = ? AND USER_ID = ?";
+        String sqlQuery = "DELETE FROM REVIEW_LIKES WHERE REVIEW_ID = ? AND USER_ID = ?";
         jdbcTemplate.update(sqlQuery, reviewLike.getReviewId(), reviewLike.getUserId());
     }
 }

@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.error.AlreadyExistException;
+import ru.yandex.practicum.filmorate.error.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.ReviewLike;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -36,12 +36,11 @@ public class ReviewService {
                 .get(review.getFilmId())
                 .orElseThrow(() -> new NotFoundException("Film not found"));
 
+        String message = "Отзыв с таким id %s уже зарегистрирован.";
         reviewStorage
                 .get(review.getReviewId())
-                .ifPresent(
-                        (val) -> {
-                            throw new AlreadyExistException(String.format(
-                                    "отзыв с таким id %s уже зарегистрирован.", review.getReviewId()));
+                .ifPresent(val -> {
+                            throw new AlreadyExistException(String.format(message, review.getReviewId()));
                         }
                 );
 
@@ -72,8 +71,7 @@ public class ReviewService {
 
         reviewStorage
                 .get(reviewId)
-                .ifPresent(
-                        (val) -> {
+                .ifPresent(val -> {
                             feedService.removeReviewFilmInFeed(val.getUserId(), reviewId);
                             reviewStorage.remove(reviewId);
                         }

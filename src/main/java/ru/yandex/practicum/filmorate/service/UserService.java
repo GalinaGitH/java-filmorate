@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.error.AlreadyExistException;
+import ru.yandex.practicum.filmorate.error.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -19,12 +19,12 @@ public class UserService {
      * сохранение пользователя
      */
     public User saveUser(User user) {
+        String message = "Пользователь с таким id %s уже зарегистрирован.";
 
         userStorage
                 .get(user.getId())
-                .ifPresent((val) -> {
-                            throw new AlreadyExistException(String.format("Пользователь с таким id %s" +
-                                    " уже зарегистрирован.", user.getId()));
+                .ifPresent(val -> {
+                            throw new AlreadyExistException(String.format(message, user.getId()));
                         }
                 );
 

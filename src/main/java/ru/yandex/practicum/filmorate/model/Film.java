@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
-import ru.yandex.practicum.filmorate.controllers.After;
+import ru.yandex.practicum.filmorate.custom_validations.After;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -18,6 +18,7 @@ import java.util.Set;
 @ToString
 @EqualsAndHashCode(of = "id")
 public class Film {
+
     @NotNull
     private Mpa mpa; //рейтинг фильма
     private long id;
@@ -31,13 +32,4 @@ public class Film {
     private long duration; // длительность
     private Set<Genre> genres; //информация о жанрах
     private Set<Director> directors; //режиссеры
-
-    public Film(long id, String name, LocalDate releaseDate, String description, long duration) {
-        this.id = id;
-        this.name = name;
-        this.releaseDate = releaseDate;
-        this.description = description;
-        this.duration = duration;
-    }
-
 }

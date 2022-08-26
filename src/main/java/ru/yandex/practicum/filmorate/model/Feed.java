@@ -10,6 +10,7 @@ import lombok.*;
 @EqualsAndHashCode
 @Builder
 public class Feed {
+
     private long timestamp;
     private long userId;
     private Event eventType;

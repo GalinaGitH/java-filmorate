@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.error;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,5 +13,4 @@ public class ErrorResponse {
     public ErrorResponse(String error) {
         this.error = error;
     }
-
 }
