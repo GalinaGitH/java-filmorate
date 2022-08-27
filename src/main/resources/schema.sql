@@ -124,6 +124,7 @@ create table IF NOT EXISTS REVIEWS
      FILM_ID     BIGINT  not null,
      IS_POSITIVE BOOLEAN not null,
      CONTENT     CHARACTER VARYING(300) not null,
+     USEFUL      INTEGER default 0,
      constraint REVIEWS_PK
          primary key (REVIEW_ID),
      constraint REVIEWS_FK

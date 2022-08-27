@@ -31,7 +31,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Optional<Review> get(long reviewId) {
-        final String sqlQuery = " SELECT REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT " +
+        final String sqlQuery = " SELECT REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT, USEFUL " +
                 " FROM REVIEWS " +
                 " WHERE REVIEW_ID = ?";
         final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, reviewId);
@@ -67,7 +67,7 @@ public class ReviewDbStorage implements ReviewStorage {
                 , review.getIsPositive()
                 , review.getContent()
                 //, review.getUserId()
-                //, review.getFilmId()
+               // , review.getFilmId()
                 , review.getReviewId());
         return review;
     }
@@ -80,30 +80,34 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public List<Review> getReviewByFilmId(long filmId, int count) {
-        final String sqlQuery = " SELECT REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT " +
+        final String sqlQuery = " SELECT REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT, USEFUL " +
                 " FROM REVIEWS " +
                 " WHERE FILM_ID = ?" +
-                " GROUP BY REVIEW_ID ";
-        final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, filmId);
-        List<Review> sorted = reviews.stream()
+                " GROUP BY REVIEW_ID " +
+                " ORDER BY USEFUL DESC " +
+                "LIMIT ?";
+        final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, filmId, count);
+/*        List<Review> sorted = reviews.stream()
                 .sorted(Comparator.comparing(e -> e.getUseful(), Comparator.reverseOrder()))
                 .limit(count)
-                .collect(Collectors.toList());
-        return sorted;
+                .collect(Collectors.toList());*/
+        return reviews;
     }
 
     @Override
     public List<Review> getAllReview(int count) {
-        final String sqlQuery = " SELECT REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT " +
+        final String sqlQuery = " SELECT REVIEW_ID, USER_ID, FILM_ID, IS_POSITIVE, CONTENT, USEFUL " +
                 " FROM REVIEWS " +
-                " GROUP BY REVIEW_ID ";
-        final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview);
-        List<Review> sorted = reviews
+                " GROUP BY REVIEW_ID " +
+                "ORDER BY USEFUL DESC " +
+                "LIMIT ?";
+        final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, count);
+/*        List<Review> sorted = reviews
                 .stream()
                 .sorted(Comparator.comparing(e -> e.getUseful(), Comparator.reverseOrder()))
                 .limit(count)
-                .collect(Collectors.toList());
-        return sorted;
+                .collect(Collectors.toList());*/
+        return reviews;
     }
 
     private Review mapRowToReview(ResultSet resultSet, int rowNum) throws SQLException {
@@ -113,8 +117,9 @@ public class ReviewDbStorage implements ReviewStorage {
                 .filmId(resultSet.getLong("FILM_ID"))
                 .isPositive(resultSet.getBoolean("IS_POSITIVE"))
                 .content(resultSet.getString("CONTENT"))
+                .useful(resultSet.getInt("USEFUL"))
                 .build();
-        rev.setUseful(getUsefulRate(rev.getReviewId())); //записываем рейтинг полезности
+
         return rev;
     }
 
@@ -145,4 +150,6 @@ public class ReviewDbStorage implements ReviewStorage {
         }
         return usefulRate;
     }
+
+
 }

@@ -24,11 +24,33 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
                 , reviewLike.getReviewId()
                 , reviewLike.getUserId()
                 , reviewLike.isUseful());
+
+        if (reviewLike.isUseful()) {
+            incrementUseful(reviewLike.getReviewId());
+        } else {
+            decrementUseful(reviewLike.getReviewId());
+        }
     }
 
     @Override
     public void removeReviewLike(ReviewLike reviewLike) {
         String sqlQuery = "DELETE FROM REVIEW_LIKES WHERE REVIEW_ID = ? AND USER_ID = ?";
         jdbcTemplate.update(sqlQuery, reviewLike.getReviewId(), reviewLike.getUserId());
+
+        if (reviewLike.isUseful()) {
+            decrementUseful(reviewLike.getReviewId());
+        } else {
+            incrementUseful(reviewLike.getReviewId());
+        }
     }
+
+    private void incrementUseful(long reviewId) {
+        String sqlQuery = "UPDATE REVIEWS SET USEFUL = USEFUL + 1 WHERE REVIEW_ID = ?";
+        jdbcTemplate.update(sqlQuery, reviewId);
+    }
+    private void decrementUseful(long reviewId) {
+        String sqlQuery = "UPDATE REVIEWS SET USEFUL = USEFUL - 1 WHERE REVIEW_ID = ?";
+        jdbcTemplate.update(sqlQuery, reviewId);
+    }
+
 }
