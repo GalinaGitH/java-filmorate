@@ -142,15 +142,16 @@ public class FilmService {
     }
 
     public List<Film> findCommonFilms(long userId, long friendId) {
-        List<Film> UserLikedFilms = filmStorage.getLikedByUserSortedPopular(userId);
-        List<Film> FriendLikedFilms = filmStorage.getLikedByUserSortedPopular(friendId);
-        if (UserLikedFilms.size() == 0 || FriendLikedFilms.size() == 0) {
-            List<Film> commonFilmsEmpty = new ArrayList<>();
-            return commonFilmsEmpty;
-        }
-        return (FriendLikedFilms.stream()
-                .filter(UserLikedFilms::contains)
-                .collect(Collectors.toList()));
+
+        userStorage
+                .get(userId)
+                .orElseThrow(() -> new NotFoundException("User with id=" + userId + "not found"));
+
+        userStorage
+                .get(friendId)
+                .orElseThrow(() -> new NotFoundException("User with id=" + friendId+ "not found"));
+
+        return filmStorage.findCommonFilms(userId, friendId);
     }
 
     public List<Film> findAllFilmsSortedByYearOrLikes(int directorId, FilmSortBy sortBy) {

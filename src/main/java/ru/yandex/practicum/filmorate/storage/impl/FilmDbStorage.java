@@ -110,16 +110,16 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getLikedByUserSortedPopular(long userId) {
         /*
         String sqlQuery = "SELECT DISTINCT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILMS.RATING" +
-                " FILM_DURATION, COUNT(L.USER_ID) AS CNT, " +
+                " FILM_DURATION, " +
                 " MPA.MPA_ID, MPA_TYPE, L.USER_ID " +
                 " FROM FILMS JOIN LIKES AS L ON FILMS.FILM_ID = L.FILM_ID " +
                 " JOIN MPA  ON MPA.MPA_ID = FILMS.MPA_ID " +
                 " WHERE L.USER_ID = ? " +
-                " GROUP BY FILMS.FILM_ID " +
-                //" ORDER BY FILMS.RATING DESC ;";
-                " ORDER BY CNT DESC;";
+                " GROUP BY FILMS.FILM_ID, FILMS.RATING " +
+                " ORDER BY FILMS.RATING DESC ;";
 
          */
+
         String sqlQuery ="SELECT DISTINCT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION," +
                 " FILM_DURATION, COUNT(L.USER_ID) AS CNT, " +
                 " MPA.MPA_ID, MPA_TYPE, L.USER_ID " +
@@ -128,6 +128,8 @@ public class FilmDbStorage implements FilmStorage {
                 " WHERE L.USER_ID = ? " +
                 " GROUP BY FILMS.FILM_ID " +
                 " ORDER BY CNT DESC;";
+
+
         List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId);
         loadGenres(films);
         return films;
@@ -170,6 +172,20 @@ public class FilmDbStorage implements FilmStorage {
                 " ORDER BY FILMS.FILM_ID DESC" +
                 ";";
         List<Film> films = jdbcTemplate.query(qbuilder, this::mapRowToFilm, params.toArray());
+        loadGenres(films);
+        return films;
+    }
+
+    @Override
+    public List<Film> findCommonFilms(long userId, long friendId) {
+        String sqlQuery ="SELECT F.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILM_DURATION," +
+                " MPA.MPA_ID, MPA.MPA_TYPE " +
+                " FROM FILMS AS F JOIN LIKES AS LU ON F.FILM_ID = LU.FILM_ID" +
+                " JOIN LIKES AS LF ON F.FILM_ID = LF.FILM_ID " +
+                " JOIN MPA ON MPA.MPA_ID = F.MPA_ID " +
+                " WHERE LU.USER_ID = ? AND LF.USER_ID = ?" +
+                " GROUP BY F.FILM_ID ";
+        List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId, friendId);
         loadGenres(films);
         return films;
     }

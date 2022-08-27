@@ -86,7 +86,7 @@ public class LikesDbStorage implements LikesStorage {
         String sqlQuery = "SELECT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILM_DURATION," +
                 " MPA.MPA_ID, MPA.MPA_TYPE " +
                 "FROM FILMS " +
-                "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                //"LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
                 "JOIN MPA ON MPA.MPA_ID=FILMS.MPA_ID " +
                 "GROUP BY FILMS.FILM_ID, FILMS.RATING " +
                 "ORDER BY FILMS.RATING DESC " +
@@ -137,7 +137,6 @@ public class LikesDbStorage implements LikesStorage {
                 "GROUP BY FILMS.FILM_ID, FILMS.RATING " +
                 "ORDER BY FILMS.RATING DESC " +
                 "LIMIT ?";
-
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, genreId, limit);
     }
 
