@@ -105,7 +105,7 @@ public class FilmService {
         Map<Long, HashMap<Long, Double>> idsUsersAndIdsFilms = prepareUsersFilmsForRecommendationService();
         recommendationService.setUsersItemsMap(idsUsersAndIdsFilms);
         List<Long> recIdsFilms = recommendationService.getRecommendedIdsItemForUser(id);
-        List<Film> recFilms = filmStorage.getFilmsFromIds(recIdsFilms);
+        List<Film> recFilms = filmStorage.findByIds(recIdsFilms);
         for (Film film : recFilms) {
             film.setDirectors(new HashSet<>(directorStorage.loadFilmDirector(film)));
         }
@@ -113,7 +113,7 @@ public class FilmService {
     }
 
     private Map<Long, HashMap<Long, Double>> prepareUsersFilmsForRecommendationService() {
-        List<Like> likesBD = likesStorage.getAllLikes();
+        List<Like> likesBD = likesStorage.getTopLikes(100000);
 
         Map<Long, HashMap<Long, Double>> preparedData = new HashMap<>();
         List<Long> idsUsers = likesBD

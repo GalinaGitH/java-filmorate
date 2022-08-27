@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
@@ -25,25 +26,31 @@ public class LikesDbStorage implements LikesStorage {
     }
 
     @Override
-    public List<Like> getLikes(long filmId, long userId) {
+    public Optional<Like> getLike(long filmId, long userId) {
         String sqlQuery = "SELECT LIKES.USER_ID, LIKES.FILM_ID, LIKES.SCORE " +
                 "FROM LIKES " +
                 "WHERE LIKES.USER_ID = ? AND LIKES.FILM_ID = ? " +
                 "LIMIT 1";
-        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> new Like(rs.getLong("LIKES.USER_ID"),
+        List<Like> likes = jdbcTemplate.query(sqlQuery, (rs, rowNum) -> new Like(rs.getLong("LIKES.USER_ID"),
                 rs.getLong("LIKES.FILM_ID"), rs.getInt("LIKES.SCORE")), userId, filmId);
+        if (likes.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(likes.get(0));
+        }
     }
 
     @Override
-    public List<Like> getAllLikes() {
+    public List<Like> getTopLikes(int limit) {
         String sqlQuery = "SELECT LIKES.USER_ID, LIKES.FILM_ID, LIKES.SCORE " +
-                "FROM LIKES ";
+                "FROM LIKES " +
+                "LIMIT ?";
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> new Like(rs.getLong("LIKES.USER_ID"),
-                rs.getLong("LIKES.FILM_ID"), rs.getInt("LIKES.SCORE")));
+                rs.getLong("LIKES.FILM_ID"), rs.getInt("LIKES.SCORE")), limit);
     }
 
     @Override
-    public void addLikes(long filmId, long userId, Integer score) {
+    public void addLike(long filmId, long userId, Integer score) {
         String sqlQuery = "INSERT INTO LIKES (FILM_ID, USER_ID, SCORE) values (?,?,?) ";
         jdbcTemplate.update(sqlQuery
                 , filmId
@@ -53,7 +60,7 @@ public class LikesDbStorage implements LikesStorage {
     }
 
     @Override
-    public void updateLikes(long filmId, long userId, Integer score) {
+    public void updateLike(long filmId, long userId, Integer score) {
         String sqlQuery = "MERGE INTO LIKES (FILM_ID, USER_ID, SCORE) values (?,?,?) ";
         jdbcTemplate.update(sqlQuery
                 , filmId
@@ -63,7 +70,7 @@ public class LikesDbStorage implements LikesStorage {
     }
 
     @Override
-    public void removeLikes(long filmId, long userId) {
+    public void removeLike(long filmId, long userId) {
         String sqlQuery = "DELETE FROM LIKES WHERE FILM_ID = ? AND USER_ID = ?";
         jdbcTemplate.update(sqlQuery, filmId, userId);
     }
@@ -122,7 +129,7 @@ public class LikesDbStorage implements LikesStorage {
                 "JOIN MPA M on M.MPA_ID = FILMS.MPA_ID " +
                 "WHERE FG.GENRE_ID = ? " +
                 "GROUP BY FILMS.FILM_ID " +
-                "ORDER BY COUNT(DISTINCT l.USER_ID) DESC " +
+                "ORDER BY AVG (l.SCORE) DESC " +
                 "LIMIT ?";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, genreId, limit);

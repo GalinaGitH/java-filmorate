@@ -10,6 +10,8 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.LikesService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -50,7 +52,7 @@ public class FilmController {
 
     @PutMapping("/films/{filmId}/like/{userId}")
     public void addLikes(@PathVariable long filmId, @PathVariable long userId, @RequestParam(defaultValue = "10",
-            required = false) @Positive Integer score) {
+            required = false) @Min(1) @Max(10) @Positive Integer score) {
         log.debug("Добавлен еще один лайк фильму: {} от пользователя c id = {}",
                 filmService.get(filmId).getName(),
                 userId);

@@ -33,12 +33,12 @@ public class LikesService {
                 .get(filmId)
                 .orElseThrow(() -> new NotFoundException("Film  not found"));
 
-        if (likesStorage.getLikes(filmId, userId).size() == 0) {
+        if (likesStorage.getLike(filmId, userId).isEmpty()) {
             feedService.addLikeFilmInFeed(filmId, userId);
-            likesStorage.addLikes(filmId, userId, score);
+            likesStorage.addLike(filmId, userId, score);
         } else {
             feedService.addLikeFilmInFeed(filmId, userId);
-            likesStorage.updateLikes(filmId, userId, score);
+            likesStorage.updateLike(filmId, userId, score);
         }
     }
 
@@ -56,7 +56,7 @@ public class LikesService {
                 .orElseThrow(() -> new NotFoundException("Film or User not found"));
 
         feedService.removeLikeFilmInFeed(filmId, userId);
-        likesStorage.removeLikes(filmId, userId);
+        likesStorage.removeLike(filmId, userId);
     }
 
     /**

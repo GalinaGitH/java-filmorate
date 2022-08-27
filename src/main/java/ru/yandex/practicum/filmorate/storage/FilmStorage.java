@@ -22,9 +22,7 @@ public interface FilmStorage {
 
     List<Film> search(String query, List<String> by);
 
-    List<Film> getLikedByUser(long userId);
-
     List<Film> getLikedByUserSortedPopular(long userId);
 
-    List<Film> getFilmsFromIds(List<Long> recIdsFilms);
+    List<Film> findByIds(List<Long> recIdsFilms);
 }

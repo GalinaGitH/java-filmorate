@@ -125,7 +125,7 @@ public class DirectorDbStorage implements DirectorStorage {
                 " MPA.MPA_ID, MPA_TYPE  " +
                 "FROM FILMS JOIN MPA ON FILMS.MPA_ID = MPA.MPA_ID " +
                 "WHERE FILM_ID IN (SELECT FILM_ID FROM FILM_DIRECTORS WHERE DIRECTOR_ID = ?) " +
-                "ORDER BY FILM_RELEASE_DATE;";
+                "ORDER BY year(FILM_RELEASE_DATE);";
         final List<Film> sortedFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, idDirector);
         loadGenres(sortedFilms);
         return sortedFilms;
