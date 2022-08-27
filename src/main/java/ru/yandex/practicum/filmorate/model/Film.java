@@ -32,4 +32,6 @@ public class Film {
     private long duration; // длительность
     private Set<Genre> genres; //информация о жанрах
     private Set<Director> directors; //режиссеры
+    @Min(value = 0)
+    private double rating;
 }

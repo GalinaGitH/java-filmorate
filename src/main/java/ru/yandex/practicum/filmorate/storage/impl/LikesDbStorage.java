@@ -57,6 +57,8 @@ public class LikesDbStorage implements LikesStorage {
                 , userId
                 , score
         );
+
+        updateRating(filmId);
     }
 
     @Override
@@ -67,12 +69,16 @@ public class LikesDbStorage implements LikesStorage {
                 , userId
                 , score
         );
+
+        updateRating(filmId);
     }
 
     @Override
     public void removeLike(long filmId, long userId) {
         String sqlQuery = "DELETE FROM LIKES WHERE FILM_ID = ? AND USER_ID = ?";
         jdbcTemplate.update(sqlQuery, filmId, userId);
+
+        updateRating(filmId);
     }
 
     @Override
@@ -82,8 +88,8 @@ public class LikesDbStorage implements LikesStorage {
                 "FROM FILMS " +
                 "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
                 "JOIN MPA ON MPA.MPA_ID=FILMS.MPA_ID " +
-                "GROUP BY FILMS.FILM_ID " +
-                "ORDER BY AVG (L.SCORE) DESC " +
+                "GROUP BY FILMS.FILM_ID, FILMS.RATING " +
+                "ORDER BY FILMS.RATING DESC " +
                 "LIMIT ?";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, size);
     }
@@ -98,8 +104,8 @@ public class LikesDbStorage implements LikesStorage {
                 "         LEFT JOIN FILM_GENRES AS FG ON FILMS.FILM_ID = FG.FILM_ID " +
                 "         JOIN MPA AS M ON FILMS.MPA_ID = M.MPA_ID " +
                 "WHERE CAST(EXTRACT(YEAR FROM FILMS.FILM_RELEASE_DATE) AS INTEGER) = ? AND FG.GENRE_ID = ? " +
-                "GROUP BY FILMS.FILM_ID " +
-                "ORDER BY AVG (L.SCORE) DESC " +
+                "GROUP BY FILMS.FILM_ID, FILMS.RATING " +
+                "ORDER BY FILMS.RATING DESC " +
                 "LIMIT ?";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, year, genreId, limit);
     }
@@ -113,8 +119,8 @@ public class LikesDbStorage implements LikesStorage {
                 "         LEFT JOIN FILM_GENRES AS FG ON FILMS.FILM_ID = FG.FILM_ID " +
                 "JOIN MPA M on M.MPA_ID = FILMS.MPA_ID " +
                 "WHERE CAST(EXTRACT(YEAR FROM FILMS.FILM_RELEASE_DATE) AS INTEGER) = ? " +
-                "GROUP BY FILMS.FILM_ID " +
-                "ORDER BY AVG (L.SCORE) DESC " +
+                "GROUP BY FILMS.FILM_ID, FILMS.RATING " +
+                "ORDER BY FILMS.RATING DESC " +
                 "LIMIT ?";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, year, limit);
     }
@@ -128,8 +134,8 @@ public class LikesDbStorage implements LikesStorage {
                 "         LEFT JOIN FILM_GENRES AS FG ON FILMS.FILM_ID = FG.FILM_ID " +
                 "JOIN MPA M on M.MPA_ID = FILMS.MPA_ID " +
                 "WHERE FG.GENRE_ID = ? " +
-                "GROUP BY FILMS.FILM_ID " +
-                "ORDER BY AVG (l.SCORE) DESC " +
+                "GROUP BY FILMS.FILM_ID, FILMS.RATING " +
+                "ORDER BY FILMS.RATING DESC " +
                 "LIMIT ?";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, genreId, limit);
@@ -145,6 +151,13 @@ public class LikesDbStorage implements LikesStorage {
                 .mpa(new Mpa(resultSet.getInt("MPA.MPA_ID"), resultSet.getString("MPA.MPA_TYPE")))
                 .build();
         return film;
+    }
+
+    private void updateRating(long filmId) {
+        String sqlQuery = "UPDATE FILMS SET (RATING) =" +
+                " (SELECT ROUND(AVG(SCORE),1) FROM LIKES WHERE LIKES.FILM_ID = ?)" +
+                " WHERE FILM_ID = ?";
+        jdbcTemplate.update(sqlQuery, filmId, filmId);
     }
 
 }

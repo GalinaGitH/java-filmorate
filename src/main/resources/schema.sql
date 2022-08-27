@@ -46,6 +46,7 @@ create table IF NOT EXISTS FILMS
     FILM_DESCRIPTION  CHARACTER VARYING(200) not null,
     FILM_DURATION     INTEGER                not null,
     MPA_ID            INTEGER                not null,
+    RATING            REAL,
     constraint FILM_ID
         primary key (FILM_ID),
     constraint MPA_ID_FK

@@ -25,4 +25,5 @@ public interface LikesStorage {
     List<Film> findPopularFilmsByGenre(Integer limit, int genreId);
 
     void updateLike(long filmId, long userId, Integer score);
+
 }

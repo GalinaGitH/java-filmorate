@@ -108,7 +108,19 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getLikedByUserSortedPopular(long userId) {
-        String sqlQuery = "SELECT DISTINCT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION," +
+        /*
+        String sqlQuery = "SELECT DISTINCT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILMS.RATING" +
+                " FILM_DURATION, COUNT(L.USER_ID) AS CNT, " +
+                " MPA.MPA_ID, MPA_TYPE, L.USER_ID " +
+                " FROM FILMS JOIN LIKES AS L ON FILMS.FILM_ID = L.FILM_ID " +
+                " JOIN MPA  ON MPA.MPA_ID = FILMS.MPA_ID " +
+                " WHERE L.USER_ID = ? " +
+                " GROUP BY FILMS.FILM_ID " +
+                //" ORDER BY FILMS.RATING DESC ;";
+                " ORDER BY CNT DESC;";
+
+         */
+        String sqlQuery ="SELECT DISTINCT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION," +
                 " FILM_DURATION, COUNT(L.USER_ID) AS CNT, " +
                 " MPA.MPA_ID, MPA_TYPE, L.USER_ID " +
                 " FROM FILMS JOIN LIKES AS L ON FILMS.FILM_ID = L.FILM_ID " +
