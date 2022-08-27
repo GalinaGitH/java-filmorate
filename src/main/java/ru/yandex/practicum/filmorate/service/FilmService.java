@@ -13,7 +13,10 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -149,7 +152,7 @@ public class FilmService {
 
         userStorage
                 .get(friendId)
-                .orElseThrow(() -> new NotFoundException("Friend with id=" + friendId+ "not found"));
+                .orElseThrow(() -> new NotFoundException("Friend with id=" + friendId + "not found"));
 
         return filmStorage.findCommonFilms(userId, friendId);
     }

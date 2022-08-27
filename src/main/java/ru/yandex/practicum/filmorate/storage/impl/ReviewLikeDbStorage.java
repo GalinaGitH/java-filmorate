@@ -48,6 +48,7 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
         String sqlQuery = "UPDATE REVIEWS SET USEFUL = USEFUL + 1 WHERE REVIEW_ID = ?";
         jdbcTemplate.update(sqlQuery, reviewId);
     }
+
     private void decrementUseful(long reviewId) {
         String sqlQuery = "UPDATE REVIEWS SET USEFUL = USEFUL - 1 WHERE REVIEW_ID = ?";
         jdbcTemplate.update(sqlQuery, reviewId);

@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -13,11 +12,8 @@ import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 @Primary
@@ -61,13 +57,10 @@ public class ReviewDbStorage implements ReviewStorage {
     public Review update(Review review) {
         String sqlQuery = " UPDATE REVIEWS SET " +
                 " IS_POSITIVE = ?, CONTENT = ? " +
-                //" ,USER_ID = ?, FILM_ID = ? " +
                 " WHERE REVIEW_ID= ?";
         jdbcTemplate.update(sqlQuery
                 , review.getIsPositive()
                 , review.getContent()
-                //, review.getUserId()
-               // , review.getFilmId()
                 , review.getReviewId());
         return review;
     }
@@ -87,10 +80,6 @@ public class ReviewDbStorage implements ReviewStorage {
                 " ORDER BY USEFUL DESC " +
                 "LIMIT ?";
         final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, filmId, count);
-/*        List<Review> sorted = reviews.stream()
-                .sorted(Comparator.comparing(e -> e.getUseful(), Comparator.reverseOrder()))
-                .limit(count)
-                .collect(Collectors.toList());*/
         return reviews;
     }
 
@@ -102,11 +91,6 @@ public class ReviewDbStorage implements ReviewStorage {
                 "ORDER BY USEFUL DESC " +
                 "LIMIT ?";
         final List<Review> reviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, count);
-/*        List<Review> sorted = reviews
-                .stream()
-                .sorted(Comparator.comparing(e -> e.getUseful(), Comparator.reverseOrder()))
-                .limit(count)
-                .collect(Collectors.toList());*/
         return reviews;
     }
 
@@ -122,34 +106,5 @@ public class ReviewDbStorage implements ReviewStorage {
 
         return rev;
     }
-
-    /**
-     * получение/расчет рейтинга полезности
-     * отзывы должны сортироваться по рейтингу полезности
-     * При создании отзыва рейтинг равен нулю.
-     * Если пользователь оценил отзыв как полезный, это увеличивает его рейтинг на 1.
-     * Если как бесполезный, то уменьшает на 1.
-     */
-    private int getUsefulRate(long reviewId) {
-        Integer usefulRate = 0;
-        try {
-            Object[] cashFlowQueryArgs = new Object[]{reviewId, reviewId};
-            final String sqlQuery = " SELECT COUNT(USER_ID) AS usefulRate " +
-                    " FROM REVIEW_LIKES " +
-                    " WHERE IS_USEFUL = TRUE  AND REVIEW_ID = ? " +
-                    " GROUP BY REVIEW_ID " +
-                    " UNION ALL " +
-                    " SELECT - 1 * COUNT(USER_ID) AS usefulRate " +
-                    " FROM REVIEW_LIKES " +
-                    " WHERE IS_USEFUL = FALSE AND REVIEW_ID = ?" +
-                    " GROUP BY REVIEW_ID";
-            usefulRate = jdbcTemplate.queryForObject(sqlQuery, cashFlowQueryArgs,
-                    new int[]{Types.BIGINT, Types.BIGINT}, Integer.class);
-        } catch (EmptyResultDataAccessException e) {
-            return usefulRate;
-        }
-        return usefulRate;
-    }
-
 
 }
