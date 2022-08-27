@@ -149,7 +149,7 @@ public class FilmService {
 
         userStorage
                 .get(friendId)
-                .orElseThrow(() -> new NotFoundException("User with id=" + friendId+ "not found"));
+                .orElseThrow(() -> new NotFoundException("Friend with id=" + friendId+ "not found"));
 
         return filmStorage.findCommonFilms(userId, friendId);
     }

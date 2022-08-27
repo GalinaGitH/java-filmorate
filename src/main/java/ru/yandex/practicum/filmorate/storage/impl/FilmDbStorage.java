@@ -107,35 +107,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getLikedByUserSortedPopular(long userId) {
-        /*
-        String sqlQuery = "SELECT DISTINCT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILMS.RATING" +
-                " FILM_DURATION, " +
-                " MPA.MPA_ID, MPA_TYPE, L.USER_ID " +
-                " FROM FILMS JOIN LIKES AS L ON FILMS.FILM_ID = L.FILM_ID " +
-                " JOIN MPA  ON MPA.MPA_ID = FILMS.MPA_ID " +
-                " WHERE L.USER_ID = ? " +
-                " GROUP BY FILMS.FILM_ID, FILMS.RATING " +
-                " ORDER BY FILMS.RATING DESC ;";
-
-         */
-
-        String sqlQuery ="SELECT DISTINCT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION," +
-                " FILM_DURATION, COUNT(L.USER_ID) AS CNT, " +
-                " MPA.MPA_ID, MPA_TYPE, L.USER_ID " +
-                " FROM FILMS JOIN LIKES AS L ON FILMS.FILM_ID = L.FILM_ID " +
-                " JOIN MPA  ON MPA.MPA_ID = FILMS.MPA_ID " +
-                " WHERE L.USER_ID = ? " +
-                " GROUP BY FILMS.FILM_ID " +
-                " ORDER BY CNT DESC;";
-
-
-        List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId);
-        loadGenres(films);
-        return films;
-    }
-
-    @Override
     public List<Film> findByIds(List<Long> idFilms) {
         String sql = String.join(",", Collections.nCopies(idFilms.size(), "?"));
         sql = String.format("SELECT  FILM_ID, FILM_NAME , FILM_RELEASE_DATE , FILM_DESCRIPTION ,FILM_DURATION ," +

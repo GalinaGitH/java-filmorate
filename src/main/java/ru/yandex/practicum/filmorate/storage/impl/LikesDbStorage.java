@@ -86,7 +86,6 @@ public class LikesDbStorage implements LikesStorage {
         String sqlQuery = "SELECT FILMS.FILM_ID, FILM_NAME, FILM_RELEASE_DATE, FILM_DESCRIPTION, FILM_DURATION," +
                 " MPA.MPA_ID, MPA.MPA_TYPE " +
                 "FROM FILMS " +
-                //"LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
                 "JOIN MPA ON MPA.MPA_ID=FILMS.MPA_ID " +
                 "GROUP BY FILMS.FILM_ID, FILMS.RATING " +
                 "ORDER BY FILMS.RATING DESC " +
@@ -100,7 +99,6 @@ public class LikesDbStorage implements LikesStorage {
         String sqlQuery = "SELECT FILMS.FILM_ID, FILMS.FILM_NAME , FILMS.FILM_RELEASE_DATE , " +
                 "       FILMS.FILM_DESCRIPTION ,FILMS.FILM_DURATION, FILMS.MPA_ID, MPA_TYPE " +
                 "FROM FILMS " +
-                "         LEFT JOIN LIKES AS l ON FILMS.FILM_ID=l.FILM_ID " +
                 "         LEFT JOIN FILM_GENRES AS FG ON FILMS.FILM_ID = FG.FILM_ID " +
                 "         JOIN MPA AS M ON FILMS.MPA_ID = M.MPA_ID " +
                 "WHERE CAST(EXTRACT(YEAR FROM FILMS.FILM_RELEASE_DATE) AS INTEGER) = ? AND FG.GENRE_ID = ? " +
@@ -115,7 +113,6 @@ public class LikesDbStorage implements LikesStorage {
         String sqlQuery = "SELECT FILMS.FILM_ID, FILMS.FILM_NAME , FILMS.FILM_RELEASE_DATE , " +
                 "       FILMS.FILM_DESCRIPTION ,FILMS.FILM_DURATION, FILMS.MPA_ID, MPA_TYPE " +
                 "FROM FILMS " +
-                "         LEFT JOIN LIKES AS l ON FILMS.FILM_ID=l.FILM_ID " +
                 "         LEFT JOIN FILM_GENRES AS FG ON FILMS.FILM_ID = FG.FILM_ID " +
                 "JOIN MPA M on M.MPA_ID = FILMS.MPA_ID " +
                 "WHERE CAST(EXTRACT(YEAR FROM FILMS.FILM_RELEASE_DATE) AS INTEGER) = ? " +
@@ -130,7 +127,6 @@ public class LikesDbStorage implements LikesStorage {
         String sqlQuery = "SELECT FILMS.FILM_ID, FILMS.FILM_NAME , FILMS.FILM_RELEASE_DATE , " +
                 "       FILMS.FILM_DESCRIPTION ,FILMS.FILM_DURATION, FILMS.MPA_ID, MPA_TYPE " +
                 "FROM FILMS " +
-                "         LEFT JOIN LIKES AS l ON FILMS.FILM_ID=l.FILM_ID " +
                 "         LEFT JOIN FILM_GENRES AS FG ON FILMS.FILM_ID = FG.FILM_ID " +
                 "JOIN MPA M on M.MPA_ID = FILMS.MPA_ID " +
                 "WHERE FG.GENRE_ID = ? " +
