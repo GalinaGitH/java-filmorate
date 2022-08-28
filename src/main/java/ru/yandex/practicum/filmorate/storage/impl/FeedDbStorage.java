@@ -18,14 +18,14 @@ public class FeedDbStorage implements ru.yandex.practicum.filmorate.storage.Feed
 
     @Override
     public void addFeed(long userId, Event event, Operation operation, long entityId) {
-        String sqlQuery = "insert into FEEDS (USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) values ( ?,?,?,? )";
+        String sqlQuery = "INSERT INTO FEEDS (USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) VALUES ( ?,?,?,? )";
         jdbcTemplate.update(sqlQuery, userId, event.toString(), operation.toString(), entityId);
 
     }
 
     @Override
     public List<Feed> getFeeds(int userId) {
-        String sqlQuery = "select * from FEEDS where USER_ID = ?";
+        String sqlQuery = "SELECT * FROM FEEDS WHERE USER_ID = ?";
         return jdbcTemplate.query(sqlQuery, this::makeFeed, userId);
     }
 

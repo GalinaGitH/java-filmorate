@@ -46,6 +46,7 @@ create table IF NOT EXISTS FILMS
     FILM_DESCRIPTION  CHARACTER VARYING(200) not null,
     FILM_DURATION     INTEGER                not null,
     MPA_ID            INTEGER                not null,
+    RATING            REAL,
     constraint FILM_ID
         primary key (FILM_ID),
     constraint MPA_ID_FK
@@ -56,6 +57,7 @@ create table IF NOT EXISTS LIKES
 (
     USER_ID BIGINT not null,
     FILM_ID BIGINT not null,
+    SCORE   INTEGER  not null,
     constraint LIKES_PK
        primary key (USER_ID,FILM_ID) ,
     constraint LIKES_FILMS_FILM_ID_FK
@@ -122,6 +124,7 @@ create table IF NOT EXISTS REVIEWS
      FILM_ID     BIGINT  not null,
      IS_POSITIVE BOOLEAN not null,
      CONTENT     CHARACTER VARYING(300) not null,
+     USEFUL      INTEGER default 0,
      constraint REVIEWS_PK
          primary key (REVIEW_ID),
      constraint REVIEWS_FK

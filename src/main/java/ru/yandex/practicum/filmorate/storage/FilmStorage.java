@@ -3,16 +3,18 @@ package ru.yandex.practicum.filmorate.storage;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface FilmStorage {
+
     Film create(Film film);
 
     Film update(Film film);
 
     void remove(Film film);
 
-    Film get(long filmId);
+    Optional<Film> get(long filmId);
 
     List<Film> findAll();
 
@@ -20,10 +22,7 @@ public interface FilmStorage {
 
     List<Film> search(String query, List<String> by);
 
-    List<Film> getLikedByUser(long userId);
+    List<Film> findByIds(List<Long> recIdsFilms);
 
-    List<Film> getLikedByUserSortedPopular(long userId);
-
-    List<Film> getRecommended(long id);
-
+    List<Film> findCommonFilms(long userId, long friendId);
 }

@@ -11,6 +11,7 @@ import javax.validation.constraints.NotBlank;
 @ToString
 @EqualsAndHashCode(of = "id")
 public class Genre {
+
     private final int id;
     @NotBlank
     private final String name;

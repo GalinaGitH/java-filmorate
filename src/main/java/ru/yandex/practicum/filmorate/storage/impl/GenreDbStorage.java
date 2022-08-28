@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class GenreDbStorage implements GenreStorage {
@@ -21,43 +22,25 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Genre getById(long id) {
-        final String sqlQuery = "select GENRE_ID ,GENRE_NAME " +
+    public Optional<Genre> getById(long id) {
+        final String sqlQuery = "SELECT GENRE_ID ,GENRE_NAME " +
                 "FROM GENRE_NAMES " +
-                "where GENRE_ID = ?";
+                "WHERE GENRE_ID = ?";
         final List<Genre> genres = jdbcTemplate.query(sqlQuery, this::mapRowToGenre, id);
         if (genres.size() != 1) {
-            return null;
+            return Optional.empty();
         }
-        return genres.get(0);
+        return Optional.of(genres.get(0));
     }
 
 
     @Override
     public List<Genre> getAll() {
-        String sqlQuery = "select  GENRE_ID ,GENRE_NAME " +
+        String sqlQuery = "SELECT  GENRE_ID ,GENRE_NAME " +
                 "FROM GENRE_NAMES ";
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
     }
 
-    /**
-     * запись жанров в БД ,заполняем таблицу FILM_GENRES
-     */
-    @Override
-    public void setFilmGenre(Film film) {
-        long id = film.getId();
-        String sqlDelete = "delete from FILM_GENRES where FILM_ID = ?";
-        jdbcTemplate.update(sqlDelete, id);
-        if (film.getGenres() == null || film.getGenres().isEmpty()) {
-            return;
-        }
-        for (Genre genre : film.getGenres()) {
-            String sqlQuery = "INSERT INTO FILM_GENRES (FILM_ID, GENRE_ID) values (?,?) ";
-            jdbcTemplate.update(sqlQuery
-                    , id
-                    , genre.getId());
-        }
-    }
 
     /**
      * получаем жанры  1-го фильма

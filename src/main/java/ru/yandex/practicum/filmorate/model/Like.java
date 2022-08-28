@@ -8,6 +8,8 @@ import lombok.*;
 @RequiredArgsConstructor
 @ToString
 public class Like {
+
     private final Long user_id;
     private final Long film_id;
+    private final Integer score;
 }

@@ -2,9 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.error.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
@@ -28,30 +27,36 @@ public class LikesService {
     /**
      * добавление лайка
      */
-    public void addLikes(long filmId, long userId) {
-        final Film film = filmStorage.get(filmId);
-        if (film == null) {
-            throw new NotFoundException("Film  not found");
-        }
+    public void addOrUpdateLikes(long filmId, long userId, Integer score) {
 
-        if (likesStorage.getLikes(filmId, userId).size() == 0) {
+        filmStorage
+                .get(filmId)
+                .orElseThrow(() -> new NotFoundException("Film  not found"));
+
+        if (likesStorage.getLike(filmId, userId).isEmpty()) {
             feedService.addLikeFilmInFeed(filmId, userId);
-            likesStorage.addLikes(filmId, userId);
+            likesStorage.addLike(filmId, userId, score);
+        } else {
+            feedService.addLikeFilmInFeed(filmId, userId);
+            likesStorage.updateLike(filmId, userId, score);
         }
-
     }
 
     /**
      * удаление лайка
      */
     public void removeLikes(long filmId, long userId) {
-        final Film film = filmStorage.get(filmId);
-        final User user = userStorage.get(userId);
-        if (film == null || user == null) {
-            throw new NotFoundException("Film or User  not found");
-        }
+
+        filmStorage
+                .get(filmId)
+                .orElseThrow(() -> new NotFoundException("Film or User not found"));
+
+        userStorage
+                .get(userId)
+                .orElseThrow(() -> new NotFoundException("Film or User not found"));
+
         feedService.removeLikeFilmInFeed(filmId, userId);
-        likesStorage.removeLikes(filmId, userId);
+        likesStorage.removeLike(filmId, userId);
     }
 
     /**
@@ -69,13 +74,14 @@ public class LikesService {
             return setGenresToFilms(likesStorage.findPopularFilmsByGenre(limit, Integer.parseInt(genreId)));
         }
 
-        List<Film> popularFilms = likesStorage.findPopularFilmsByYearAndGenres(limit, Integer.parseInt(year), Integer.parseInt(genreId));
+        List<Film> popularFilms = likesStorage.findPopularFilmsByYearAndGenres(limit, Integer.parseInt(year),
+                Integer.parseInt(genreId));
         return setGenresToFilms(popularFilms);
     }
 
     private List<Film> setGenresToFilms(List<Film> films) {
         for (Film film : films) {
-            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film))); //получаем жанры фильма и добавляем к обьекту
+            film.setGenres(new HashSet<>(genreStorage.loadFilmGenre(film))); //получаем жанры фильма,добавляем к обьекту
         }
         return films;
     }
