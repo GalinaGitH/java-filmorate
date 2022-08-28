@@ -60,7 +60,9 @@ public class ReviewService {
                 .orElseThrow(() -> new NotFoundException("Review not found"));
 
         feedService.updateReviewFilmInFeed(reviewFromStorage.getUserId(), reviewFromStorage.getReviewId());
-        reviewStorage.update(review);
+        reviewFromStorage.setContent(review.getContent());
+        reviewFromStorage.setIsPositive(review.getIsPositive());
+        reviewStorage.update(reviewFromStorage);
         return review;
     }
 
